@@ -155,8 +155,9 @@ See [TESTING.md](TESTING.md) for commands and numbers. In short:
   `verify_replaces --image` and `label_fmt` pass.
 - **On hardware:** OCTABAM3 was flashed on 2 Oct 2026; its MIX 0 was not dry
   (fixed in OCTABAM4, see Compatibility). OCTABAM4, flashed the same day,
-  saturated less than the plugin (fixed in OCTABAM8). OCTABAM8 has not been
-  flashed yet.
+  saturated less than the plugin (fixed in OCTABAM8). OCTABAM8 was flashed
+  the same day on the author's MKII and reported working (a listening test,
+  not a stress run).
 - **Not done:** the 60-minute eight-track hardware stress project
   and worst-case cycles measured on hardware.
 

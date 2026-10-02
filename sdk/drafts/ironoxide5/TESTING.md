@@ -116,7 +116,10 @@ rebound to the BUILD=8 image.
 
 - 2 Oct 2026, OCTABAM4 on the author's unit: works, but saturates less than
   the plugin. This is the report that led to the change above.
-- OCTABAM8: not flashed yet.
+- 2 Oct 2026, OCTABAM8 (MAIN OS `f2e05300…`, this source) on the author's
+  unit, an Octatrack MKII per the same day's TapeHead report: "yes it works",
+  the saturation now matching the plugin. A listening report only: duration,
+  track and instance counts were not given, and there was no stress run.
 
 
 ## Commands and exact revision (OCTABAM4)

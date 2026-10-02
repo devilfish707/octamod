@@ -77,7 +77,7 @@
       "Draft only: not in the catalog, configurator or firmware builder until hardware qualification and owner review are complete.",
       "Flutter and noise (the plugin's D and E) are not implemented; this is the plugin at D = E = 0.",
       "OUT above 64 can drive the output past full scale; the DSP's output store limits it.",
-      "This revision rewrites the octabam build's per-sample path (see TESTING.md). OCTABAM3 and OCTABAM4 were flashed on 2 Oct 2026 (MIX not dry; then less saturation than the plugin). OCTABAM8, with the input level fixed, has not been.",
+      "This revision rewrites the octabam build's per-sample path (see TESTING.md). OCTABAM3 and OCTABAM4 were flashed on 2 Oct 2026 (MIX not dry; then less saturation than the plugin). OCTABAM8, with the input level fixed, was flashed the same day and reported working (a listening test).",
       "MIX covers the upper half of the plugin's inv/dry/wet knob (dry to wet); the inverted half is not available.",
       "Effect ID 0x1e, priority 18 and layout letter 5 were checked free against the eleven Octamod modules and the TapeHead draft only."
     ]
@@ -126,7 +126,7 @@
   },
   "tests": {
     "report": "TESTING.md",
-    "summary": "verify.py renders the assembled module in dsp_host against the plugin's own float code: peak error 3.7e-4 over nine settings x seven signals at two input levels, the plugin's THD at the unit's level within 1 dB, exact silence, MIX 0 dry within 1 LSB at any setting, stereo independence and split blocks. The composed test image renders within 4.7e-5 at the defaults. Benchmarked against stock SPRING REV. Menu, init-register and replace gates pass; MKII emulator LCD captures included. OCTABAM3 was flashed on 2 Oct 2026; MIX 0 was not dry there (the plugin's inverted half), fixed in OCTABAM4. OCTABAM4 (flashed 2 Oct 2026) saturated less than the plugin because the unit feeds FX 12 dB below DAW level; fixed in OCTABAM8 (plugin(4x)/4), not yet flashed.",
+    "summary": "verify.py renders the assembled module in dsp_host against the plugin's own float code: peak error 3.7e-4 over nine settings x seven signals at two input levels, the plugin's THD at the unit's level within 1 dB, exact silence, MIX 0 dry within 1 LSB at any setting, stereo independence and split blocks. The composed test image renders within 4.7e-5 at the defaults. Benchmarked against stock SPRING REV. Menu, init-register and replace gates pass; MKII emulator LCD captures included. OCTABAM3 was flashed on 2 Oct 2026; MIX 0 was not dry there (the plugin's inverted half), fixed in OCTABAM4. OCTABAM4 (flashed 2 Oct 2026) saturated less than the plugin because the unit feeds FX 12 dB below DAW level; fixed in OCTABAM8 (plugin(4x)/4), which the author flashed and reported working the same day (a listening test, not a stress run).",
     "hardwareStatus": "untested",
     "evidenceRevision": "433fa32c0f5b381cf5a71930dc45e121609b7f4d",
     "gates": [
