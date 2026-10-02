@@ -136,7 +136,10 @@ See [TESTING.md](TESTING.md) for commands and numbers. In short:
   draws the chooser and page below, with CLIP and SPLIT printing their
   words. `verify_menu`, `verify_initregs`, `verify_replaces --image` and
   `label_fmt` pass.
-- **Not done:** a flash, the 60-minute eight-track hardware stress project
+- **On hardware (MKII, 2 Oct 2026):** OCTABAM9 ran about two minutes on
+  four tracks with p-lock automation and scenes and "sounds great". A
+  listening test, not a stress run.
+- **Not done:** the 60-minute eight-track hardware stress project
   and worst-case cycles measured on hardware.
 
 ## Authorship and licences

@@ -139,7 +139,7 @@
   },
   "tests": {
     "report": "TESTING.md",
-    "summary": "verify.py renders the assembled module in dsp_host against JClones_OInflator.jsfx: peak error 5.2e-5 over eleven settings (both modes, clip on and off, extremes) x eight signals at two input levels, the JSFX's THD at the unit's level within 1 dB (gain-staged JSFX(4x)/4 for the Octatrack's FX input level), exact silence, an EFFECT 0 passthrough within 4 LSB, clip, stereo independence and split blocks. The composed test image renders within 4.8e-7 at the defaults. Benchmarked against stock SPRING REV. Menu, label, init-register and replace gates pass; MKII emulator LCD captures included. Not flashed.",
+    "summary": "verify.py renders the assembled module in dsp_host against JClones_OInflator.jsfx: peak error 5.2e-5 over eleven settings (both modes, clip on and off, extremes) x eight signals at two input levels, the JSFX's THD at the unit's level within 1 dB (gain-staged JSFX(4x)/4 for the Octatrack's FX input level), exact silence, an EFFECT 0 passthrough within 4 LSB, clip, stereo independence and split blocks. The composed test image renders within 4.8e-7 at the defaults. Benchmarked against stock SPRING REV. Menu, label, init-register and replace gates pass; MKII emulator LCD captures included. OCTABAM9 was played on the author's MKII for about two minutes on four tracks with p-locks and scenes and reported sounding great (a listening test, not a stress run).",
     "hardwareStatus": "untested",
     "evidenceRevision": "433fa32c0f5b381cf5a71930dc45e121609b7f4d",
     "gates": [

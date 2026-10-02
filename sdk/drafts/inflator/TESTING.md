@@ -108,7 +108,11 @@ Provenance is rebound to the BUILD=9 image.
 
 ### Hardware
 
-Not flashed (neither OCTABAM5 nor OCTABAM9).
+2 Oct 2026, devilfish707, Octatrack MKII, OCTABAM9 (MAIN OS `bb6c9cfd…`,
+this source): about two minutes with Inflator on four tracks under p-lock
+automation and scene changes, reported as "sounds great". A listening report:
+no stress run, measured timing, recording or recovery test. OCTABAM5 was
+never flashed.
 
 
 ## Commands and exact revision (OCTABAM5)
