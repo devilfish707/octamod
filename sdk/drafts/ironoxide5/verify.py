@@ -14,15 +14,20 @@ Gates:
   1. channel_l / channel_r are straight-line (no control transfer).
   2. No instruction decodes as mpysu.
   3. Zero in -> exactly zero out, at the dearest settings.
-  4. Peak error against reference.py <= 1e-3 over nine knob settings
-     (defaults, every extreme, mixed) x impulse, step and 50 Hz-12 kHz
-     tones at -2 dBFS. The octabam source measured 2.0 here.
+  4. Peak error of the module's output against reference.py <= 1e-3 over
+     nine knob settings (defaults, every
+     extreme, mixed) x impulse, step and 50 Hz-12 kHz tones, each at -2 dBFS
+     and at 0.22 FS (a normalized sample at the default AMP VOL 64). The
+     octabam source measured 2.0 here.
   5. MIX 0 is dry (within 1 LSB) whatever the other knobs do, and MIX 64
      is the linear blend.
   6. L and R are independent: a stereo render equals two mono renders.
   7. The A/B flip survives a block boundary: one render in 16-sample blocks
      equals the reference sample for sample (covered by 4), and odd-length
      blocks (split 7/9) match an unsplit render bit for bit.
+  8. The level fix: at the unit's working level, the defaults give the
+     plugin's THD on a normalized 100 Hz sine within 1 dB (it was 24 dB
+     short).
 """
 import math
 import os
@@ -128,12 +133,23 @@ def run(work, mem, syms, knobs, samples, stereo=False, tag="r", extra=()):
     return o, float(meter.group(1)) if meter else None
 
 
-def signal(kind, n=4800):
+def signal(kind, n=4800, amp=None):
     if kind == "impulse":
-        return [round(0.9 * Q) if i == 0 else 0 for i in range(n)]
+        return [round((amp or 0.9) * Q) if i == 0 else 0 for i in range(n)]
     if kind == "step":
-        return [round(0.5 * Q)] * n
-    return [round(0.8 * (Q - 1) * math.sin(2 * math.pi * kind * i / 44100)) for i in range(n)]
+        return [round((amp or 0.5) * Q)] * n
+    return [round((amp or 0.8) * (Q - 1) * math.sin(2 * math.pi * kind * i / 44100))
+            for i in range(n)]
+
+
+def thd_db(y, f, sr=44100):
+    import numpy as np
+    y = np.asarray(y[len(y) // 2:])
+    Y = np.abs(np.fft.rfft(y * np.hanning(len(y))))
+    def b(k):
+        c = int(round(k * f * len(y) / sr))
+        return Y[c - 2:c + 3].max()
+    return 20 * math.log10(math.sqrt(sum(b(k) ** 2 for k in range(2, 10))) / b(1))
 
 
 def main():
@@ -168,15 +184,19 @@ def main():
         worst, where, ipc = 0.0, None, 0.0
         for knobs in grid:
             for kind in ("impulse", "step", 50, 220, 1000, 4000, 12000):
-                x = signal(kind)
-                o, m = run(work, mem, syms, list(knobs), x, tag="grid")
-                ipc = max(ipc, m or 0)
-                ref = reference.render(knobs, [v / Q for v in x])
-                e = max(abs(a / Q - b) for a, b in zip(o[0::2], ref))
-                if e > worst:
-                    worst, where = e, (knobs, kind)
+                for amp in (None, 0.22):
+                    x = signal(kind, amp=amp)
+                    o, m = run(work, mem, syms, list(knobs), x, tag="grid")
+                    ipc = max(ipc, m or 0)
+                    ref = reference.render(knobs, [v / Q for v in x])
+                    # The output's error, as the octabam-era gate measured it. Not
+                    # x INPUT_GAIN: the residual is the OUT fit, applied after the
+                    # saturators, so the /4 does not shrink it.
+                    e = max(abs(a / Q - b) for a, b in zip(o[0::2], ref))
+                    if e > worst:
+                        worst, where = e, (knobs, kind, amp or "hot")
         gate(f"peak error vs the plugin <= {TOL}", worst <= TOL,
-             f"worst {worst:.2e} at INPUT/HIGH/LOW/OUTPUT/MIX, signal {where}")
+             f"worst {worst:.2e} at INPUT/HIGH/LOW/OUTPUT/MIX, signal, level {where}")
         print(f"       meter: {ipc:.1f} instructions/sample (one instance, dsp_host)")
 
         # 5. MIX
@@ -204,6 +224,16 @@ def main():
         whole, _ = run(work, mem, syms, [100, 100, 60, 64, 127], x, tag="whole")
         split, _ = run(work, mem, syms, [100, 100, 60, 64, 127], x, tag="split", extra=["-split", "7"])
         gate("split 7/9 blocks == unsplit render, bit for bit", whole == split)
+
+        # 8. the level fix: unit level vs the plugin at DAW level
+        n = 22050
+        daw = [0.89 * math.sin(2 * math.pi * 100 * i / 44100) for i in range(n)]
+        unit = [round(v * 0.254 * (Q - 1)) for v in daw]
+        o, _ = run(work, mem, syms, [64, 72, 72, 64, 127], unit, tag="thd")
+        t_mod = thd_db([v / Q for v in o[0::2]], 100)
+        t_plug = thd_db(reference.render_plugin((64, 72, 72, 64, 127), daw), 100)
+        gate("defaults at AMP VOL 64 saturate like the plugin at 0 dBFS",
+             abs(t_mod - t_plug) <= 1.0, f"THD module {t_mod:.1f} dB, plugin {t_plug:.1f} dB")
     finally:
         shutil.rmtree(work, ignore_errors=True)
 

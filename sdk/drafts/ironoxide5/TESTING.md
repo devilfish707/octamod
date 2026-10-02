@@ -1,6 +1,125 @@
 # IronOxide5 testing
 
-## Commands and exact revision
+## The input level (2 Oct 2026, OCTABAM8)
+
+The newest results. The sections after this one describe the build before it
+(OCTABAM4, `ironoxide5.asm` `9968f2f9…`) and still hold for everything this
+change does not touch.
+
+| file | SHA-256 |
+|---|---|
+| `ironoxide5.asm` (input-level fix) | `5fb0c75fc1717d48424ace3c2f537fd5aa89c89ff42266b267a318445237871e` |
+
+### Why
+
+Heard on the unit with OCTABAM4: IronOxide5 saturates less than the plugin.
+The render gate matched the plugin (re-run on this base: 7.65e-4, as recorded),
+so the difference is level. The mixer model (`sdk/octabam/docs/remixer/HARNESS.md`,
+measured under the ColdFire port) applies AMP VOL as (v/127)² before the FX
+chain: at the default VOL 64 a 0 dBFS sample reaches the module at 0.254 FS.
+TapeHead 0.1.2 was fixed for the same reason, and Character's TAPE mode before
+it.
+
+OCTABAM4's source in `dsp_host`, a 0.89-amplitude 100 Hz sine scaled by 0.254,
+against the plugin on the unscaled sine (HIGH 72, LOW 72, OUT 64, MIX 127):
+
+| INPUT | OCTABAM4 THD | plugin THD | this version THD |
+|---:|---:|---:|---:|
+| 32 | — | −38.2 dB | −37.9 dB (float model) |
+| 64 | −44.1 dB | −19.9 dB | −19.6 dB |
+| 90 | −29.4 dB | −10.4 dB | −10.3 dB (float model) |
+| 127 | −11.4 dB | −7.7 dB | −7.7 dB (float model) |
+
+### The change
+
+The module computes `plugin(4x) / 4`. Before the first saturator the plugin is
+linear (the one-pole highpass), and the dry path is linear, so this is exactly
+`inputgain × 4` and `outputgain / 4`, with dry unchanged. Both come free from
+the existing words:
+
+- `INPUTGAIN` (stored /8) is read as 4·inputgain/32, so x2 = t sits at shift 6
+  instead of 4. The first saturator's ±π/2 clamp becomes `$03243F`/`$FCDBC1`
+  (the second saturator's constants, already at shift 6), and T = t/2 is
+  `asl #5` instead of `asl #3`.
+- The wet sum shifts left 2 instead of 4.
+
+654 words and 194 cycles/sample, both unchanged. At shift 6 the sine argument's
+LSB is 7.6e-6.
+
+### The render gate
+
+`python3 verify.py`:
+
+```
+assembled 654 words; init P:2000 proc P:200b
+[PASS] channel_l is straight-line, one rts
+[PASS] channel_r is straight-line, one rts
+[PASS] no mpysu anywhere []
+[PASS] dearest settings: zero in, zero out
+[PASS] peak error vs the plugin <= 0.001 worst 3.68e-04 at INPUT/HIGH/LOW/OUTPUT/MIX, signal, level ((64, 72, 72, 127, 127), 220, 'hot')
+       meter: 184.7 instructions/sample (one instance, dsp_host)
+[PASS] MIX 0 is dry at HIGH 72, LOW 72, INPUT/OUT 127 max deviation 1 LSB
+[PASS] MIX 0 is dry at HIGH 0, LOW 127, INPUT/OUT 127 max deviation 1 LSB
+[PASS] MIX 0 is dry at HIGH 127, LOW 0, INPUT/OUT 127 max deviation 1 LSB
+[PASS] MIX 64 = 63/127 dry + 64/127 wet max deviation 2.03e-07
+[PASS] stereo render == two mono renders, bit for bit
+[PASS] split 7/9 blocks == unsplit render, bit for bit
+[PASS] defaults at AMP VOL 64 saturate like the plugin at 0 dBFS THD module -19.6 dB, plugin -19.9 dB
+all IRONOXIDE5 gates passed
+```
+
+Changes to the gate: every signal also runs at 0.22 FS (a normalized sample at
+VOL 64), and gate 8 pins the THD match; against OCTABAM4's source it fails by
+24.2 dB. The error is still measured on the module's output, as before. In
+the plugin's own units (× 4) it would read 1.47e-3, but the residual is the OUT
+trim's fit, applied after the saturators, so the /4 does not shrink it. The
+worst case is OUT 127 (+17.7 dB), where 0.8 of output carries 3.7e-4 (4.6e-4
+relative). OCTABAM4's store clipped nearly all of that range, which is why
+its 7.65e-4 came from 4 kHz instead.
+
+### Composed image, cycles, benchmark, captures
+
+`hardware-test-remix.py` as `remixes/ironoxide5-spring/remix.py`, `make image
+REMIX=ironoxide5-spring BUILD=8` on this branch's base (`433fa32`), the author's
+local MAIN OS (`164f3122…0a84e`):
+
+```
+IRONOXIDE5    P:0x01252..0x014e0 ( 654 words)  id 0x1e      (payload A)
+IRONOXIDE5    P:0x01012..0x012a0 ( 654 words)  id 0x1e      (payload B)
+round-trip: payload ok, checksum ok
+```
+
+| artifact (local only, never committed) | SHA-256 |
+|---|---|
+| `out/mainos_bus.bin` (BUILD=8) | `f2e053009b7a1a7997920bab0a2912f9975dfc7c62182ec914dce0109d49d1b4` |
+| `out/OCTATRACK_OCTABAM8.bin` | `d9169231c845128b09bab845f526446d156eb2d4966d5583ca7b8a6d79d541c1` |
+| `out/OCTATRACK_OS1.40C_OCTABAM8.syx` | `14056d11a009b43ec0ea7a9ece7bbc864ac9cd7f6552146a68b3d6e9dcc9eec7` |
+
+The same setup rebuilds OCTABAM4 from its source with MAIN OS `76d6290a…` (as
+recorded below) and a card image byte-identical to the author's
+`OCTATRACK_OCTABAM4.bin` (`c42b1293…`; see the correction under The hardware
+test image).
+
+On BUILD=8: `verify_menu` ALL CHECKS PASSED, `verify_initregs` 0 failures,
+`verify_replaces --image` OK, `label_fmt` OK; `cycle_count.py --verify`:
+marker identical, **194 cycles/sample** (85 words per channel call), worst core
+776. `benchmark.py` (2,048 blocks): one instance 2,954 per block (184.6 per
+sample), four per core 11,816 fixed / 11,820 modulated / 13,144 worst split,
+which is identical to OCTABAM4. The composed payloads render IRONOXIDE5 within
+4.7e-5 of `reference.py` at the defaults, with L = R.
+
+LCD captures with the same plan on `ot_emu` `2360ffb2…5115` and the BUILD=8
+image: location, controls and OUT byte-identical to `media/`. Provenance is
+rebound to the BUILD=8 image.
+
+### Hardware
+
+- 2 Oct 2026, OCTABAM4 on the author's unit: works, but saturates less than
+  the plugin. This is the report that led to the change above.
+- OCTABAM8: not flashed yet.
+
+
+## Commands and exact revision (OCTABAM4)
 
 All results below are for this draft's files on top of Octamod `main` at
 `433fa32c0f5b381cf5a71930dc45e121609b7f4d` (2 Oct 2026), with the vendored
@@ -132,8 +251,14 @@ out/mainos_bus.bin: 1,112,560 bytes, 3831 changed
 | artifact (local only, never committed) | SHA-256 |
 |---|---|
 | `out/mainos_bus.bin` | `76d6290a098aa083787e07da77d1718f9b1a88a3e28e3b0df7d4141f74d20d19` |
-| `out/OCTATRACK_OCTABAM4.bin` | `47c30f156bc40e991140961ef33a3365afad8b27ff3e18c1296b730ec9d25834` |
-| `out/OCTATRACK_OS1.40C_OCTABAM4.syx` | `dc00a2541536ba2229c20adb66b945aa19285a04e736a96dc0d1da06e4433ca8` |
+| `out/OCTATRACK_OCTABAM4.bin` | `c42b1293f67eccc600383f4ce8fdd0e5d7b0e5e8011092444e83a6738e177918` |
+| `out/OCTATRACK_OS1.40C_OCTABAM4.syx` | `fe126289cdfde7aac9bc70e939e5f6ae6c0dd45efb08cb5ea21296cfb8c6a854` |
+
+Corrected 2 Oct 2026: this table first listed `47c30f15…` and `dc00a254…`.
+`47c30f15…` is the author's OCTABAM3 card image, and the syx was presumably
+OCTABAM3's too. The values above come from rebuilding OCTABAM4 from this
+source; the card image matches the author's OCTABAM4 file byte for byte, and
+the MAIN OS matches the `76d6290a…` recorded here.
 
 `make_bin.py` round-trips the card image (payload and checksum ok).
 Composed-image render: `benchmark.py`'s IRONOXIDE5 dump, one instance at
@@ -219,6 +344,7 @@ Fixed in OCTABAM4: MIX is now the plugin's upper half only (G = 0.5 +
 MIX/254), so 0 is dry and 127 fully wet. `verify.py` now checks MIX 0 is dry
 within 1 LSB with INPUT and OUT at 127 and HIGH/LOW at both extremes. Only
 the MIX setup changed: 3 words less, 3 instructions per block less, the
-LCD captures pixel-identical. OCTABAM4 has not been flashed.
+LCD captures pixel-identical. OCTABAM4 was flashed later that day: see the
+input-level section at the top.
 
 The octabam build was never heard on a unit.

@@ -12,6 +12,12 @@ import math
 
 HALF_PI = 1.57079633
 
+# The unit applies AMP VOL as (v/127)^2 before the FX chain: at the default
+# VOL 64 a 0 dBFS sample arrives at 0.254 FS. The module runs the plugin at
+# x * INPUT_GAIN and divides its output by INPUT_GAIN, so a sample at the
+# default VOL saturates as the same sample does in the plugin in a DAW.
+INPUT_GAIN = 4.0
+
 
 def _sat(x):
     b = math.sin(min(abs(x), HALF_PI))
@@ -71,7 +77,16 @@ def from_knobs(inp, high, low, out, mix):
     return IronOxide5(inp / 128.0, high / 128.0, low / 128.0, out / 128.0, 0.5 + mix / 254.0)
 
 
-def render(knobs, xs):
-    """Mono in, left out, limited to +-1 as the DSP's output store is."""
+def render_plugin(knobs, xs):
+    """The plugin alone at the panel's knob mapping (no INPUT_GAIN), mono in,
+    left out, unlimited."""
     io = from_knobs(*knobs)
-    return [max(-1.0, min(1.0, io.process(v, v)[0])) for v in xs]
+    return [io.process(v, v)[0] for v in xs]
+
+
+def render(knobs, xs):
+    """What the module renders: plugin(INPUT_GAIN * x) / INPUT_GAIN, mono in,
+    left out, limited to +-1 as the DSP's output store is."""
+    io = from_knobs(*knobs)
+    g = INPUT_GAIN
+    return [max(-1.0, min(1.0, io.process(v * g, v * g)[0] / g)) for v in xs]

@@ -29,6 +29,14 @@ slower tape; a higher LOW leans out the bass.
 It is a buffer-free insert: no allocator memory, no bus role and no absolute
 Y addresses, so it runs on FX1 or FX2 of any track.
 
+The Octatrack applies AMP VOL before the FX chain, so at the default VOL 64 a
+normalized sample reaches the effect about 12 dB below where it reaches the
+plugin in a DAW. The module therefore runs the plugin at +12 dB in and
+−12 dB out (`plugin(4x) / 4`): with INPUT at 64 a normalized sample at VOL 64
+saturates as it does in the plugin at its defaults, and dry and wet keep the
+plugin's levels. Before this (OCTABAM4) the same setting gave 24 dB less
+distortion than the plugin.
+
 The plugin's Flutter and Noise knobs are not implemented. With both at 0 the
 plugin's flutter stage returns its input and its noise stage does nothing,
 so this module is the plugin at Flutter = Noise = 0. The plugin's 32-tap
@@ -46,7 +54,7 @@ controls.
 
 | slot | control | default | range | what it does |
 |---|---|---|---|---|
-| 0 | INPUT | 64 | 0–127 | Input trim, −18 dB at 0 to +18 dB at 127; 64 is 0 dB. Drives the first saturator. |
+| 0 | INPUT | 64 | 0–127 | Input trim, −18 dB at 0 to +18 dB at 127; 64 is 0 dB, the plugin's default drive for a normalized sample at AMP VOL 64 (see Overview). Drives the first saturator. |
 | 1 | HIGH | 72 | 0–127 | Tape speed, 1.65 to 165 ips as knob⁴. Higher is brighter and tighter; 72 is the plugin's 15 ips. |
 | 2 | LOW | 72 | 0–127 | Tape low: the highpass before the saturator. Higher values cut more bass. |
 | 3 | OUT | 64 | 0–127 | Output trim of the wet signal, −18 to +18 dB; 64 is 0 dB. |
@@ -83,6 +91,9 @@ Bring OUT up until the level matches MIX 0 (dry).
 - OS 1.40C only, as for every Octamod module. MKI and MKII use the same DSP
   code; the MKII panel has been captured in the emulator only.
 - 44.1 kHz, as the plugin's coefficients assume.
+- AMP VOL is part of the drive, as the track level into the plugin would be
+  in a DAW: above VOL 64 a normalized sample drives harder than the plugin
+  does at the same INPUT. Lower VOL or INPUT for a cleaner result.
 - OUT above 64 can push the output past full scale, where the DSP's output
   store limits it.
 - MIX is a plain dry/wet; the plugin's inverted half is not available. (The
@@ -102,12 +113,14 @@ See [TESTING.md](TESTING.md) for commands and numbers. In short:
 - **Against the plugin (emulator):** `verify.py` assembles
   `ironoxide5.asm`, runs it in `dsp_host` and compares it with
   `reference.py`, a line-for-line port of `IronOxide5Proc.cpp`. Peak error
-  is 7.7e-4 over nine knob settings (defaults, every extreme, mixed) × seven
-  signals. Silence in gives silence out; MIX 0 is dry within 1 LSB at any
+  is 3.7e-4 over nine knob settings (defaults, every extreme, mixed) × seven
+  signals at two levels (−2 dBFS, and 0.22 FS: a normalized sample at VOL
+  64). At the defaults a normalized 100 Hz sine at the unit's level has
+  −19.6 dB THD against the plugin's −19.9 dB at 0 dBFS (OCTABAM4: −44.1 dB). Silence in gives silence out; MIX 0 is dry within 1 LSB at any
   setting and MIX 64 is the linear blend; the stereo channels are independent; the sample
   routines are straight-line; no `mpysu` remains; split blocks match unsplit
   ones bit for bit, so the A/B alternation survives a call boundary. In the
-  composed test image it renders within 1.8e-4 of the plugin at the
+  composed test image it renders within 4.7e-5 of the plugin at the
   defaults.
 - **Against SPRING REV (emulator, `benchmark.py`):**
 
@@ -131,12 +144,19 @@ See [TESTING.md](TESTING.md) for commands and numbers. In short:
   6.8e-5), the highpass update takes three fewer instructions, and a
   shift pair folds away. One instance went from 4,455 to 2,954 executed
   instructions per block, 34% less than the octabam build.
+- **Input level** (after the OCTABAM4 listen, "saturates less than the
+  plugin"): AMP VOL's (v/127)² ahead of the FX left a normalized sample
+  12 dB short of the plugin's drive. Fixed with `plugin(4x)/4`. The highpass
+  and dry path are linear, so this is inputgain × 4 and outputgain / 4, done
+  by reading the existing words at different shifts: no word or cycle added.
 - **Composed build:** `ironoxide5-spring` builds, packs into
-  `OCTATRACK_OCTABAM4.bin` with a valid checksum, boots in the emulator and
+  `OCTATRACK_OCTABAM8.bin` with a valid checksum, boots in the emulator and
   draws the chooser and page below. `verify_menu`, `verify_initregs`,
   `verify_replaces --image` and `label_fmt` pass.
 - **On hardware:** OCTABAM3 was flashed on 2 Oct 2026; its MIX 0 was not dry
-  (fixed in OCTABAM4, see Compatibility). OCTABAM4 has not been flashed.
+  (fixed in OCTABAM4, see Compatibility). OCTABAM4, flashed the same day,
+  saturated less than the plugin (fixed in OCTABAM8). OCTABAM8 has not been
+  flashed yet.
 - **Not done:** the 60-minute eight-track hardware stress project
   and worst-case cycles measured on hardware.
 
@@ -174,7 +194,7 @@ reconstruction. No audio is included.
 | `reference.py` | the plugin's processing in Python, and the knob mapping |
 | `gen_constants.py` | octabam's generator for the per-block coefficient fits |
 | `benchmark.py` | instruction counts against stock SPRING REV (needs your local 1.40C) |
-| `hardware-test-remix.py` | the remix the OCTABAM4 test image was built from |
+| `hardware-test-remix.py` | the remix the OCTABAM3, 4 and 8 test images were built from |
 | `octamod.module.json` | website metadata |
 | `qualification.example.json` | the qualification record, incomplete |
 | `presentation/thumbnail.svg` | the card illustration |

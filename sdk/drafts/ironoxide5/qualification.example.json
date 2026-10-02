@@ -1,6 +1,6 @@
 {
   "moduleVersion": "0.1.0-experimental",
-  "sourceSha256": "9968f2f90566dcf337cba7944f05b652591106480f7d2e7ff958c630da269d1a",
+  "sourceSha256": "5fb0c75fc1717d48424ace3c2f537fd5aa89c89ff42266b267a318445237871e",
   "imageSha256": "REPLACE_WITH_LOCAL_TESTED_IMAGE_SHA256",
   "cycles": [
     {
@@ -16,7 +16,7 @@
         "parameterModulation": "Pending on hardware. Knobs are read once per block, so modulation changes no per-sample cost; benchmark.py moves every control every block (11,820 vs 11,816 instructions per block fixed).",
         "modeSwitching": "Pending: repeated FX reselection, NONE bypass and Part changes on hardware.",
         "maxLoad": "Static: eight instances per core (FX1 and FX2 on four tracks) = 1,552 cycles/sample against 3,120 usable. Not measured on hardware or in a composed image.",
-        "inputConditions": "verify.py: silence, a 0.9 impulse, a 0.5 step and 50 Hz-12 kHz tones at -2 dBFS. Full-scale and DC worst cases on hardware pending."
+        "inputConditions": "verify.py: silence, a 0.9 impulse, a 0.5 step and 50 Hz-12 kHz tones at -2 dBFS and at 0.22 FS (a normalized sample at AMP VOL 64). Full-scale and DC worst cases on hardware pending."
       },
       "report": "TESTING.md"
     }

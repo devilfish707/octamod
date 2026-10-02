@@ -20,7 +20,7 @@
     "summary": "Airwindows IronOxide5 on the DSP: tape-speed filtering and two stages of sine saturation, with input and output trim.",
     "overview": "IronOxide5 thins the low end with its tape-low filter, drives the signal into a sine saturator, smooths it through a leaky tape-speed integrator and limits it with a second sine stage. HIGH sets the tape speed (brighter and tighter as it rises), LOW the lean-out, INPUT the drive and OUT the level. MIX blends from dry at 0 to fully wet at 127. Flutter and noise are not implemented. It is a buffer-free insert for FX1 or FX2 on any track. This is a source draft: it is not in the catalog or the firmware builder.",
     "highlights": [
-      "Port of Airwindows IronOxide5 at Flutter and Noise 0, within 7.7e-4 of the plugin's own code",
+      "Port of Airwindows IronOxide5 at Flutter and Noise 0, within 3.7e-4 of the plugin's own code, gain-staged for the Octatrack's FX input level",
       "INPUT and OUT trims of -18 to +18 dB, tape speed 1.65 to 165 ips",
       "MIX from dry to fully wet",
       "185 executed instructions per sample: 29% below stock SPRING REV"
@@ -77,7 +77,7 @@
       "Draft only: not in the catalog, configurator or firmware builder until hardware qualification and owner review are complete.",
       "Flutter and noise (the plugin's D and E) are not implemented; this is the plugin at D = E = 0.",
       "OUT above 64 can drive the output past full scale; the DSP's output store limits it.",
-      "This revision rewrites the octabam build's per-sample path (see TESTING.md). OCTABAM3 was flashed on 2 Oct 2026; OCTABAM4, with MIX as a plain dry/wet, has not been.",
+      "This revision rewrites the octabam build's per-sample path (see TESTING.md). OCTABAM3 and OCTABAM4 were flashed on 2 Oct 2026 (MIX not dry; then less saturation than the plugin). OCTABAM8, with the input level fixed, has not been.",
       "MIX covers the upper half of the plugin's inv/dry/wet knob (dry to wet); the inverted half is not available.",
       "Effect ID 0x1e, priority 18 and layout letter 5 were checked free against the eleven Octamod modules and the TapeHead draft only."
     ]
@@ -126,7 +126,7 @@
   },
   "tests": {
     "report": "TESTING.md",
-    "summary": "verify.py renders the assembled module in dsp_host against the plugin's own float code: peak error 7.7e-4 over nine settings x seven signals, exact silence, MIX 0 dry within 1 LSB at any setting, stereo independence and split blocks. The composed test image renders within 1.8e-4 at the defaults. Benchmarked against stock SPRING REV. Menu, init-register and replace gates pass; MKII emulator LCD captures included. OCTABAM3 was flashed on 2 Oct 2026; MIX 0 was not dry there (the plugin's inverted half), fixed in OCTABAM4, which has not been flashed.",
+    "summary": "verify.py renders the assembled module in dsp_host against the plugin's own float code: peak error 3.7e-4 over nine settings x seven signals at two input levels, the plugin's THD at the unit's level within 1 dB, exact silence, MIX 0 dry within 1 LSB at any setting, stereo independence and split blocks. The composed test image renders within 4.7e-5 at the defaults. Benchmarked against stock SPRING REV. Menu, init-register and replace gates pass; MKII emulator LCD captures included. OCTABAM3 was flashed on 2 Oct 2026; MIX 0 was not dry there (the plugin's inverted half), fixed in OCTABAM4. OCTABAM4 (flashed 2 Oct 2026) saturated less than the plugin because the unit feeds FX 12 dB below DAW level; fixed in OCTABAM8 (plugin(4x)/4), not yet flashed.",
     "hardwareStatus": "untested",
     "evidenceRevision": "433fa32c0f5b381cf5a71930dc45e121609b7f4d",
     "gates": [
@@ -155,7 +155,7 @@
         "shows": "location",
         "firmware": "1.40C",
         "moduleVersion": "0.1.0-experimental",
-        "imageSha256": "76d6290a098aa083787e07da77d1718f9b1a88a3e28e3b0df7d4141f74d20d19",
+        "imageSha256": "f2e053009b7a1a7997920bab0a2912f9975dfc7c62182ec914dce0109d49d1b4",
         "setup": "ot_emu (MKII panel) on 1.40C composed with the ironoxide5-spring remix: stock effects, IRONOXIDE5 in SPRING REV's FX2 row, stock DSP code built in; empty scratch card; transport stopped; actual 128x64 LCD pixels at integer scale 6."
       }
     },
@@ -172,7 +172,7 @@
         "shows": "controls",
         "firmware": "1.40C",
         "moduleVersion": "0.1.0-experimental",
-        "imageSha256": "76d6290a098aa083787e07da77d1718f9b1a88a3e28e3b0df7d4141f74d20d19",
+        "imageSha256": "f2e053009b7a1a7997920bab0a2912f9975dfc7c62182ec914dce0109d49d1b4",
         "setup": "ot_emu (MKII panel) on 1.40C composed with the ironoxide5-spring remix: stock effects, IRONOXIDE5 in SPRING REV's FX2 row, stock DSP code built in; empty scratch card; transport stopped; actual 128x64 LCD pixels at integer scale 6."
       }
     },
@@ -189,7 +189,7 @@
         "shows": "controls",
         "firmware": "1.40C",
         "moduleVersion": "0.1.0-experimental",
-        "imageSha256": "76d6290a098aa083787e07da77d1718f9b1a88a3e28e3b0df7d4141f74d20d19",
+        "imageSha256": "f2e053009b7a1a7997920bab0a2912f9975dfc7c62182ec914dce0109d49d1b4",
         "setup": "ot_emu (MKII panel) on 1.40C composed with the ironoxide5-spring remix: stock effects, IRONOXIDE5 in SPRING REV's FX2 row, stock DSP code built in; empty scratch card; transport stopped; actual 128x64 LCD pixels at integer scale 6."
       }
     }

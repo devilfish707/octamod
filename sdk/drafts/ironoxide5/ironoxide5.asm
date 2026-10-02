@@ -27,12 +27,23 @@
 ;      count. It now uses r4/r5 (linear, set here), swapped every sample.
 ;
 ; Scaling (true value = stored word * 2^shift):
-;   iir state shift0, x - iir and x1 shift1, inputgain shift3, x2 shift4,
+;   iir state shift0, x - iir and x1 shift1, inputgain shift3, x2 shift6
+;   (it carries INPUT_GAIN: the same word read as 4*inputgain at shift5),
 ;   fast state shift4 (its gain 1/(1-decay) reaches 10.1), outscale shift2,
 ;   x6 shift6, sin argument T = t/2 (shift1), T^2 shift2, wetgain shift3.
 ;   Clamps to +-pi/2 are cmp + Tcc on the accumulator.
 ;
 ; The saturators use a degree-5 minimax sine (error 6.8e-5 on [0, pi/2]).
+;
+; INPUT_GAIN = 4 (+12.04 dB), added 2 Oct 2026 after a hardware listen
+; ("saturates less than the plugin"). The unit applies AMP VOL as (v/127)^2
+; BEFORE the FX chain, so at the default VOL 64 a 0 dBFS sample arrives at
+; 0.254 FS, 12 dB below what the plugin sees in a DAW; at INPUT 64 that was
+; 24 dB less THD. The module now computes plugin(4x)/4. The highpass and the
+; dry path are linear, so that is exactly inputgain*4 and outputgain/4: the
+; INPUTGAIN word is read at shift5 instead of shift3 (x2 at shift6, the
+; first clamp and T's shift move with it) and the wet sum shifts left 2
+; instead of 4. No word or cycle is added. TapeHead 0.1.2 made the same fix.
 ;
 ; Every mpy uses a pair dsp_asm encodes as a SIGNED mpy (y1,y0 / y0,y0 /
 ; y1,x1 / y0,x0 / x0,x0); verify.py checks that no mpysu remains.
@@ -343,14 +354,14 @@ channel_l:
         sub     a,b                      ; new iir = x - x1
         move    b,x:(r4+$0)
         move    x:(r7+$09),y0            ; INPUTGAIN (shift3)
-        mpy     y1,y0,a                  ; x2 (shift4)
-        move    #>$0C90FD,x1               ; +pi/2 at this shift
+        mpy     y1,y0,a                  ; x2 = t = 4*x1*inputgain (shift6)
+        move    #>$03243F,x1               ; +pi/2 at this shift
         cmp     x1,a
         tgt     x1,a
-        move    #>$F36F03,x1               ; -pi/2
+        move    #>$FCDBC1,x1               ; -pi/2
         cmp     x1,a
         tlt     x1,a
-        asl     #$3,a,a                  ; T = t/2
+        asl     #$5,a,a                  ; T = t/2
         move    a,y0                     ; T
         mpy     y0,y0,a                  ; T^2 (shift2)
         move    a,y1
@@ -401,7 +412,7 @@ channel_l:
         move    a,y1                     ; wet (shift1)
         move    x:(r7+$0f),y0            ; WETGAIN (shift3)
         mpy     y1,y0,a
-        asl     #$4,a,a
+        asl     #$2,a,a                  ; wet/4: INPUT_GAIN undone (was #$4)
         move    x0,y1
         move    x:(r7+$0e),y0            ; DRY
         mac     y1,y0,a                  ; + x*dry
@@ -421,14 +432,14 @@ channel_r:
         sub     a,b                      ; new iir = x - x1
         move    b,x:(r4+$4)
         move    x:(r7+$09),y0            ; INPUTGAIN (shift3)
-        mpy     y1,y0,a                  ; x2 (shift4)
-        move    #>$0C90FD,x1               ; +pi/2 at this shift
+        mpy     y1,y0,a                  ; x2 = t = 4*x1*inputgain (shift6)
+        move    #>$03243F,x1               ; +pi/2 at this shift
         cmp     x1,a
         tgt     x1,a
-        move    #>$F36F03,x1               ; -pi/2
+        move    #>$FCDBC1,x1               ; -pi/2
         cmp     x1,a
         tlt     x1,a
-        asl     #$3,a,a                  ; T = t/2
+        asl     #$5,a,a                  ; T = t/2
         move    a,y0                     ; T
         mpy     y0,y0,a                  ; T^2 (shift2)
         move    a,y1
@@ -479,7 +490,7 @@ channel_r:
         move    a,y1                     ; wet (shift1)
         move    x:(r7+$0f),y0            ; WETGAIN (shift3)
         mpy     y1,y0,a
-        asl     #$4,a,a
+        asl     #$2,a,a                  ; wet/4: INPUT_GAIN undone (was #$4)
         move    x0,y1
         move    x:(r7+$0e),y0            ; DRY
         mac     y1,y0,a                  ; + x*dry
