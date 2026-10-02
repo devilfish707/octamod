@@ -16,6 +16,15 @@
 ; (y/4) * OUTPUT * 8. Filter states are kept in the same x / 2 scale; the
 ; coefficients absorb the JSFX's fixed x2/x4 gains (see gen_constants.py).
 ;
+; INPUT_GAIN = 4 (+12.04 dB), added 2 Oct 2026 after a hardware listen
+; (TapeHead and IronOxide5 "saturate less than the plugin"): the unit
+; applies AMP VOL as (v/127)^2 BEFORE the FX chain, so at the default VOL 64
+; a 0 dBFS sample arrives at 0.254 FS, 12 dB below what the JSFX sees in a
+; DAW, and the shaper, defined relative to the JSFX's 0 dBFS, barely bends.
+; The module computes JSFX(4x)/4: the input's `asl` becomes `asl #3` (the
+; accumulator's extension carries 4x into the existing clip, the JSFX's own),
+; and the output's `asl #3` becomes `asl #1`. No word or cycle is added.
+;
 ; Cost. The per-sample code walks two constant tables with post-increment
 ; pointers and parallel moves, so almost every instruction is one word:
 ; r5 -> the shaper's table, reset before each band; r3 -> the band-split
@@ -175,7 +184,7 @@ ch_one:
         move    a,y1
         move    x:(r7+$08),y0            ; IG8
         mpy     y1,y0,a
-        asl     a                        ; X = x * input gain / 4
+        asl     #$3,a,a                  ; X = 4x * input gain / 4 (INPUT_GAIN; the extension holds it to the clip)
         move    x:(r7+$0e),x1
         cmp     x1,a
         tgt     x1,a                     ; clip
@@ -205,14 +214,14 @@ ch_one:
         move    a,y1                     ; y/4
         move    x:(r7+$09),y0            ; OG
         mpy     y1,y0,a
-        asl     #$3,a,a                  ; y * output gain * 2
+        asl     #$1,a,a                  ; y * output gain * 2 / 4 (INPUT_GAIN undone)
         rts
 
 ch_split:
         move    a,y1
         move    x:(r7+$08),y0            ; IG8
         mpy     y1,y0,a
-        asl     a                        ; X
+        asl     #$3,a,a                  ; X, with INPUT_GAIN
         move    x:(r7+$0e),x1
         cmp     x1,a
         tgt     x1,a
@@ -330,7 +339,7 @@ ch_split:
         move    a,y1
         move    x:(r7+$09),y0            ; OG
         mpy     y1,y0,a
-        asl     #$3,a,a
+        asl     #$1,a,a                  ; / 4: INPUT_GAIN undone
         rts
 
 ; ---------------------------------------------------------------------------

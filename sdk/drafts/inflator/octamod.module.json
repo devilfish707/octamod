@@ -20,7 +20,7 @@
     "summary": "An Oxford-style inflator (JClones OInflator) on the DSP: curve-shaped saturation for loudness, with an optional three-band split.",
     "overview": "Inflator pushes perceived loudness and density without obvious distortion. Its waveshaper g(1 - |g|) lifts mid levels and rounds peaks; EFFECT blends it with the dry signal and CURVE moves it from soft to hard. With SPLIT on, the lows (below 240 Hz), mids and highs (above 2.4 kHz) are shaped separately. CLIP limits the input at 0 dBFS or allows 6 dB more. It is a buffer-free insert for FX1 or FX2 on any track. This is a source draft: it is not in the catalog or the firmware builder.",
     "highlights": [
-      "Port of JClones OInflator (MIT), within 2.1e-4 of the JSFX in both modes",
+      "Port of JClones OInflator (MIT), within 5.2e-5 of the JSFX in both modes, gain-staged for the Octatrack's FX input level",
       "INPUT -6 to +12 dB, OUTPUT -12 to 0 dB, CURVE -50 to +50, CLIP and SPLIT as in the JSFX",
       "Single band: 90 executed instructions per sample, a third of stock SPRING REV",
       "Band split: about the same as SPRING REV per instance, 15% below it at the worst four-per-core case"
@@ -139,7 +139,7 @@
   },
   "tests": {
     "report": "TESTING.md",
-    "summary": "verify.py renders the assembled module in dsp_host against JClones_OInflator.jsfx: peak error 2.1e-4 over eleven settings (both modes, clip on and off, extremes) x eight signals, exact silence, an EFFECT 0 passthrough within 15 LSB, clip, stereo independence and split blocks. The composed test image renders within 1.8e-4. Benchmarked against stock SPRING REV. Menu, label, init-register and replace gates pass; MKII emulator LCD captures included. Not flashed.",
+    "summary": "verify.py renders the assembled module in dsp_host against JClones_OInflator.jsfx: peak error 5.2e-5 over eleven settings (both modes, clip on and off, extremes) x eight signals at two input levels, the JSFX's THD at the unit's level within 1 dB (gain-staged JSFX(4x)/4 for the Octatrack's FX input level), exact silence, an EFFECT 0 passthrough within 4 LSB, clip, stereo independence and split blocks. The composed test image renders within 4.8e-7 at the defaults. Benchmarked against stock SPRING REV. Menu, label, init-register and replace gates pass; MKII emulator LCD captures included. Not flashed.",
     "hardwareStatus": "untested",
     "evidenceRevision": "433fa32c0f5b381cf5a71930dc45e121609b7f4d",
     "gates": [
@@ -168,7 +168,7 @@
         "shows": "location",
         "firmware": "1.40C",
         "moduleVersion": "0.1.0-experimental",
-        "imageSha256": "4ec513e79009dca117ec054312a2265e7b76f3b689fdbb960920e4be91eb5cc6",
+        "imageSha256": "bb6c9cfd3fa7899bcbe9c3c91b8b26c2a8162351818e0fbf87d1202e7180c321",
         "setup": "ot_emu (MKII panel) on 1.40C composed with the inflator-spring remix: stock effects, INFLATOR in SPRING REV's FX2 row, stock DSP code built in; empty scratch card; transport stopped; actual 128x64 LCD pixels at integer scale 6."
       }
     },
@@ -185,7 +185,7 @@
         "shows": "controls",
         "firmware": "1.40C",
         "moduleVersion": "0.1.0-experimental",
-        "imageSha256": "4ec513e79009dca117ec054312a2265e7b76f3b689fdbb960920e4be91eb5cc6",
+        "imageSha256": "bb6c9cfd3fa7899bcbe9c3c91b8b26c2a8162351818e0fbf87d1202e7180c321",
         "setup": "ot_emu (MKII panel) on 1.40C composed with the inflator-spring remix: stock effects, INFLATOR in SPRING REV's FX2 row, stock DSP code built in; empty scratch card; transport stopped; actual 128x64 LCD pixels at integer scale 6."
       }
     },
@@ -202,7 +202,7 @@
         "shows": "controls",
         "firmware": "1.40C",
         "moduleVersion": "0.1.0-experimental",
-        "imageSha256": "4ec513e79009dca117ec054312a2265e7b76f3b689fdbb960920e4be91eb5cc6",
+        "imageSha256": "bb6c9cfd3fa7899bcbe9c3c91b8b26c2a8162351818e0fbf87d1202e7180c321",
         "setup": "ot_emu (MKII panel) on 1.40C composed with the inflator-spring remix: stock effects, INFLATOR in SPRING REV's FX2 row, stock DSP code built in; empty scratch card; transport stopped; actual 128x64 LCD pixels at integer scale 6."
       }
     }

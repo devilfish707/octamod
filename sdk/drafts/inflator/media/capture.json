@@ -1,8 +1,8 @@
 {
   "firmware": "1.40C",
-  "imageSha256": "4ec513e79009dca117ec054312a2265e7b76f3b689fdbb960920e4be91eb5cc6",
+  "imageSha256": "bb6c9cfd3fa7899bcbe9c3c91b8b26c2a8162351818e0fbf87d1202e7180c321",
   "emulatorSha256": "2360ffb244833bc015cdc84ecc36394758bf93952034a8b08a63e1955af85115",
-  "setup": "Headless ot_emu; MKII panel; stopped transport; 128\u00d764 LCD at integer scale 6.",
+  "setup": "Headless ot_emu; MKII panel; stopped transport; 128×64 LCD at integer scale 6.",
   "palette": {
     "on": [
       240,
@@ -111,11 +111,12 @@
     "media/ot-split.png": "split-on.png"
   },
   "sourceSha256": {
-    "inflator.asm": "fcb1db5edf5f93f3b0f952098cc9963f08fa932258336f0975f7bfdad2acd8ba",
+    "inflator.asm": "fcd96fe92447ff7fe4da7c19a34d28941dc2674d3eb07d80ecab87cdd8521662",
     "manifest.py": "ed8a729f865192dd5209205da687ad18271a990466e8419ad95c782e1bcfb606"
   },
   "limitations": [
     "Emulator UI evidence only; no hardware, audio or stress qualification.",
     "Empty scratch card, no samples or projects."
-  ]
+  ],
+  "note": "Re-captured on the OCTABAM9 image (input-level fix) with the same plan and ot_emu binary: all three PNGs byte-identical to the OCTABAM5 captures."
 }

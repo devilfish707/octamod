@@ -1,6 +1,6 @@
 {
   "moduleVersion": "0.1.0-experimental",
-  "sourceSha256": "fcb1db5edf5f93f3b0f952098cc9963f08fa932258336f0975f7bfdad2acd8ba",
+  "sourceSha256": "fcd96fe92447ff7fe4da7c19a34d28941dc2674d3eb07d80ecab87cdd8521662",
   "imageSha256": "REPLACE_WITH_LOCAL_TESTED_IMAGE_SHA256",
   "cycles": [
     {

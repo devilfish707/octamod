@@ -1,6 +1,117 @@
 # Inflator testing
 
-## Commands and exact revision
+## The input level (2 Oct 2026, OCTABAM9)
+
+The newest results. The sections after this one describe the build before it
+(OCTABAM5, `inflator.asm` `fcb1db5e…`) and still hold for everything this
+change does not touch.
+
+| file | SHA-256 |
+|---|---|
+| `inflator.asm` (input-level fix, written by `gen_asm.py`) | `fcd96fe92447ff7fe4da7c19a34d28941dc2674d3eb07d80ecab87cdd8521662` |
+
+### Why
+
+On the unit, TapeHead and IronOxide5 both saturated less than their plugins.
+The cause was the level: the mixer model (`sdk/octabam/docs/remixer/HARNESS.md`,
+measured under the ColdFire port) applies AMP VOL as (v/127)² before the FX
+chain, so at the default VOL 64 a 0 dBFS sample reaches the module at
+0.254 FS. Inflator's shaper is defined relative to the JSFX's 0 dBFS (it runs
+at x/2 and clips at 0.5), so it has the same problem. OCTABAM5's source in
+`dsp_host`, a 0.89-amplitude 100 Hz sine scaled by 0.254, against the JSFX on
+the unscaled sine (INPUT 42, EFFECT 127, CURVE 64, CLIP ON, OUT 127):
+
+| SPLIT | OCTABAM5 THD | JSFX THD | this version THD |
+|---|---:|---:|---:|
+| OFF | −46.0 dB | −21.9 dB | −21.6 dB |
+| ON | −48.0 dB | −24.6 dB | −24.3 dB |
+
+The float model gives the same gap at EFFECT 64 (−50.4 against −27.1 dB) and
+at CURVE 127 (−33.5 against −18.3 dB).
+
+### The change
+
+`JSFX(4x) / 4`, in `gen_asm.py`: the input stage's `asl a` (X = x·IG8·2)
+becomes `asl #3` (×4 more), with the accumulator's extension carrying the
+overshoot into the existing clip, which is the JSFX's own. The output's
+`asl #3` becomes `asl #1` in both paths. 576 words and 89 / 258
+cycles/sample, unchanged. The JSFX's 0 dBFS (CLIP ON) now sits at 1/4 FS on
+the unit's bus: a normalized sample at VOL 64 just reaches it. The generator
+reproduced the committed asm byte for byte before the edit.
+
+### The render gate
+
+`python3 verify.py`:
+
+```
+assembled 576 words; init P:2000 proc P:2031
+[PASS] ch_one is straight-line, one rts
+[PASS] ch_split is straight-line, one rts
+[PASS] no mpysu anywhere []
+[PASS] SPLIT 0, dearest settings: zero in, zero out
+[PASS] SPLIT 1, dearest settings: zero in, zero out
+[PASS] peak error vs the JSFX <= 0.001 worst 5.24e-05 at INPUT/EFFCT/CURVE/CLIP/SPLIT/OUT, signal, level ((42, 127, 64, 1, 1, 127), 'noise', 0.22)
+       meter: 89.9 (single band) / 258.9 (band split) instructions/sample
+[PASS] EFFECT 0, 0 dB in and out, 0.22 FS: passthrough within 32 LSB (-108 dBFS) max deviation 4 LSB (-126 dBFS)
+[PASS] CLIP ON, +12 dB in: output within the JSFX's full scale / INPUT_GAIN peak 0.2500
+[PASS] band split: stereo render == two mono renders, bit for bit
+[PASS] band split: split 7/9 blocks == unsplit render, bit for bit
+[PASS] EFFECT 127, SPLIT 0, at AMP VOL 64: the JSFX's THD at 0 dBFS module -21.6 dB, JSFX -21.9 dB
+[PASS] EFFECT 127, SPLIT 1, at AMP VOL 64: the JSFX's THD at 0 dBFS module -24.3 dB, JSFX -24.6 dB
+all INFLATOR gates passed
+```
+
+Changes to the gate:
+- Every signal also runs at 0.22 FS. The error is still the module's output's.
+- Gate 5's passthrough uses a 0.22 FS sine: the JSFX's 0 dBFS clip is at 1/4 FS
+  now, so a −2 dBFS passthrough is clipped, as the JSFX is.
+- Gate 6 holds the output at the JSFX's full scale / 4.
+- Gate 9 pins the THD match in both modes. Against OCTABAM5's source it fails
+  by 24.1 dB (single band) and 23.4 dB (split).
+
+Precision improved: 2.09e-4 → 5.24e-5 peak, 15 → 4 LSB passthrough, because
+the signal now uses more of the word.
+
+### Composed image, cycles, benchmark, captures
+
+`make image REMIX=inflator-spring BUILD=9` on this branch's base (`433fa32`),
+with the author's local MAIN OS (`164f3122…0a84e`):
+
+```
+INFLATOR      P:0x01252..0x01492 ( 576 words)  id 0x1b      (payload A)
+INFLATOR      P:0x01012..0x01252 ( 576 words)  id 0x1b      (payload B)
+round-trip: payload ok, checksum ok
+```
+
+| artifact (local only, never committed) | SHA-256 |
+|---|---|
+| `out/mainos_bus.bin` (BUILD=9) | `bb6c9cfd3fa7899bcbe9c3c91b8b26c2a8162351818e0fbf87d1202e7180c321` |
+| `out/OCTATRACK_OCTABAM9.bin` | `b57fe75757c6a716e707483c785f32e27ebbf41cd2f1227af5f1cca88ced033b` |
+| `out/OCTATRACK_OS1.40C_OCTABAM9.syx` | `0a3cb11cc68c266e3209335eaa5ddfd436e818259384a18b99bdd4b9c6712f71` |
+
+The same setup rebuilds OCTABAM5 from its source with all three hashes recorded
+below, and its card image is byte-identical to the author's file.
+
+On BUILD=9:
+- `verify_menu` ALL CHECKS PASSED, `verify_initregs` 0 failures,
+  `verify_replaces --image` OK, `label_fmt` OK.
+- `cycle_count.py --verify`: marker identical, **258 cycles/sample** (worst of
+  89/258).
+- `benchmark.py`: every case identical to OCTABAM5 (1,436 / 4,143 per block for
+  one instance, 17,272 worst split peak per core).
+- The composed payloads render INFLATOR within 4.8e-7 of `reference.py` at the
+  defaults, with L = R.
+
+LCD captures with the same plan on `ot_emu` `2360ffb2…5115` and the BUILD=9
+image: location, controls and SPLIT ON are byte-identical to `media/`.
+Provenance is rebound to the BUILD=9 image.
+
+### Hardware
+
+Not flashed (neither OCTABAM5 nor OCTABAM9).
+
+
+## Commands and exact revision (OCTABAM5)
 
 All results below are for this draft's files on top of Octamod `main` at
 `433fa32c0f5b381cf5a71930dc45e121609b7f4d` (2 Oct 2026), with the vendored
