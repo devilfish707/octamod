@@ -18,17 +18,17 @@
     "label": "TAPE EMULATION",
     "family": "Saturation",
     "summary": "Airwindows IronOxide5 on the DSP: tape-speed filtering and two stages of sine saturation, with input and output trim.",
-    "overview": "IronOxide5 thins the low end with its tape-low filter, drives the signal into a sine saturator, smooths it through a leaky tape-speed integrator and limits it with a second sine stage. HIGH sets the tape speed (brighter and tighter as it rises), LOW the lean-out, INPUT the drive and OUT the level. MIX runs from dry plus inverted wet through dry to fully wet, as in the plugin. Flutter and noise are not implemented. It is a buffer-free insert for FX1 or FX2 on any track. This is a source draft: it is not in the catalog or the firmware builder.",
+    "overview": "IronOxide5 thins the low end with its tape-low filter, drives the signal into a sine saturator, smooths it through a leaky tape-speed integrator and limits it with a second sine stage. HIGH sets the tape speed (brighter and tighter as it rises), LOW the lean-out, INPUT the drive and OUT the level. MIX blends from dry at 0 to fully wet at 127. Flutter and noise are not implemented. It is a buffer-free insert for FX1 or FX2 on any track. This is a source draft: it is not in the catalog or the firmware builder.",
     "highlights": [
       "Port of Airwindows IronOxide5 at Flutter and Noise 0, within 7.7e-4 of the plugin's own code",
       "INPUT and OUT trims of -18 to +18 dB, tape speed 1.65 to 165 ips",
-      "Inv/dry/wet MIX as in the plugin",
+      "MIX from dry to fully wet",
       "185 executed instructions per sample: 29% below stock SPRING REV"
     ],
     "usage": [
       "Assign IRONOXIDE5 in FUNC + FX2 (or FX1) SETUP with LEVEL and YES. Defaults are the plugin's: INPUT and OUT at 0 dB, 15 ips, fully wet.",
       "Raise INPUT for more saturation and pull OUT down to match the level. HIGH darkens and loosens the sound as it falls; LOW thins the bass as it rises.",
-      "Set MIX to 64 for dry, or between 64 and 127 to blend the tape sound in."
+      "Turn MIX down from 127 to blend the tape sound with the dry track; 0 is dry."
     ]
   },
   "controls": [
@@ -64,7 +64,7 @@
       "name": "MIX",
       "default": 127,
       "count": 128,
-      "doc": "Inv/dry/wet: 0 is dry plus inverted wet, 64 dry, 127 fully wet (the plugin default).",
+      "doc": "Dry/wet: 0 is dry, 127 fully wet (the plugin default). The plugin's knob also has an inverted half below dry, which is not used.",
       "labels": null
     }
   ],
@@ -77,7 +77,8 @@
       "Draft only: not in the catalog, configurator or firmware builder until hardware qualification and owner review are complete.",
       "Flutter and noise (the plugin's D and E) are not implemented; this is the plugin at D = E = 0.",
       "OUT above 64 can drive the output past full scale; the DSP's output store limits it.",
-      "This revision rewrites the octabam build's per-sample path (see TESTING.md). It has not been flashed.",
+      "This revision rewrites the octabam build's per-sample path (see TESTING.md). OCTABAM3 was flashed on 2 Oct 2026; OCTABAM4, with MIX as a plain dry/wet, has not been.",
+      "MIX covers the upper half of the plugin's inv/dry/wet knob (dry to wet); the inverted half is not available.",
       "Effect ID 0x1e, priority 18 and layout letter 5 were checked free against the eleven Octamod modules and the TapeHead draft only."
     ]
   },
@@ -85,11 +86,11 @@
     "recorded": "2 Oct 2026, static, emulator and benchmark.py",
     "storage": {
       "label": "DSP program",
-      "display": "657 words P, 28 words X per instance, no buffer",
-      "value": 657,
+      "display": "654 words P, 28 words X per instance, no buffer",
+      "value": 654,
       "unit": "words",
       "method": "static",
-      "conditions": "Composed build report (both payloads place 657 words in the donor region). State, coefficients and staging use 28 words of the instance's own r7 block; no allocator buffer, no Y memory. SPRING REV: 1,063 words plus the 16,384-word FX2 instance buffer.",
+      "conditions": "Composed build report (both payloads place 654 words in the donor region). State, coefficients and staging use 28 words of the instance's own r7 block; no allocator buffer, no Y memory. SPRING REV: 1,063 words plus the 16,384-word FX2 instance buffer.",
       "source": "TESTING.md"
     },
     "processing": {
@@ -98,7 +99,7 @@
       "value": 194,
       "unit": "cycles/sample",
       "method": "static",
-      "conditions": "tools/build/cycle_count.py static count of the sample loop. benchmark.py, executed instructions: 185/sample for one instance (SPRING REV 262); four per core worst 13,168 per 16-sample block (SPRING REV 20,376). Not a hardware load figure.",
+      "conditions": "tools/build/cycle_count.py static count of the sample loop. benchmark.py, executed instructions: 185/sample for one instance (SPRING REV 262); four per core worst 13,144 per 16-sample block (SPRING REV 20,376). Not a hardware load figure.",
       "source": "TESTING.md"
     },
     "impact": {
@@ -118,14 +119,14 @@
       "memory": {
         "level": "low",
         "basis": "source-estimate",
-        "rationale": "657 words of DSP program per payload and 28 words in each instance's existing r7 block. No allocator buffer or Y memory, where SPRING REV takes 1,063 words and a 16,384-word instance buffer.",
+        "rationale": "654 words of DSP program per payload and 28 words in each instance's existing r7 block. No allocator buffer or Y memory, where SPRING REV takes 1,063 words and a 16,384-word instance buffer.",
         "source": "TESTING.md"
       }
     }
   },
   "tests": {
     "report": "TESTING.md",
-    "summary": "verify.py renders the assembled module in dsp_host against the plugin's own float code: peak error 7.7e-4 over nine settings x seven signals, exact silence, MIX, stereo independence and split blocks. The composed test image renders within 1.8e-4 at the defaults. Benchmarked against stock SPRING REV. Menu, init-register and replace gates pass; MKII emulator LCD captures included. Not flashed.",
+    "summary": "verify.py renders the assembled module in dsp_host against the plugin's own float code: peak error 7.7e-4 over nine settings x seven signals, exact silence, MIX 0 dry within 1 LSB at any setting, stereo independence and split blocks. The composed test image renders within 1.8e-4 at the defaults. Benchmarked against stock SPRING REV. Menu, init-register and replace gates pass; MKII emulator LCD captures included. OCTABAM3 was flashed on 2 Oct 2026; MIX 0 was not dry there (the plugin's inverted half), fixed in OCTABAM4, which has not been flashed.",
     "hardwareStatus": "untested",
     "evidenceRevision": "433fa32c0f5b381cf5a71930dc45e121609b7f4d",
     "gates": [
@@ -154,7 +155,7 @@
         "shows": "location",
         "firmware": "1.40C",
         "moduleVersion": "0.1.0-experimental",
-        "imageSha256": "b3c8dc17da6256e54b18ae6d14b82a8bd12695d6ade74fb29e9893445434c8a4",
+        "imageSha256": "76d6290a098aa083787e07da77d1718f9b1a88a3e28e3b0df7d4141f74d20d19",
         "setup": "ot_emu (MKII panel) on 1.40C composed with the ironoxide5-spring remix: stock effects, IRONOXIDE5 in SPRING REV's FX2 row, stock DSP code built in; empty scratch card; transport stopped; actual 128x64 LCD pixels at integer scale 6."
       }
     },
@@ -171,7 +172,7 @@
         "shows": "controls",
         "firmware": "1.40C",
         "moduleVersion": "0.1.0-experimental",
-        "imageSha256": "b3c8dc17da6256e54b18ae6d14b82a8bd12695d6ade74fb29e9893445434c8a4",
+        "imageSha256": "76d6290a098aa083787e07da77d1718f9b1a88a3e28e3b0df7d4141f74d20d19",
         "setup": "ot_emu (MKII panel) on 1.40C composed with the ironoxide5-spring remix: stock effects, IRONOXIDE5 in SPRING REV's FX2 row, stock DSP code built in; empty scratch card; transport stopped; actual 128x64 LCD pixels at integer scale 6."
       }
     },
@@ -188,7 +189,7 @@
         "shows": "controls",
         "firmware": "1.40C",
         "moduleVersion": "0.1.0-experimental",
-        "imageSha256": "b3c8dc17da6256e54b18ae6d14b82a8bd12695d6ade74fb29e9893445434c8a4",
+        "imageSha256": "76d6290a098aa083787e07da77d1718f9b1a88a3e28e3b0df7d4141f74d20d19",
         "setup": "ot_emu (MKII panel) on 1.40C composed with the ironoxide5-spring remix: stock effects, IRONOXIDE5 in SPRING REV's FX2 row, stock DSP code built in; empty scratch card; transport stopped; actual 128x64 LCD pixels at integer scale 6."
       }
     }

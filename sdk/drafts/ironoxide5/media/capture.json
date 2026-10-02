@@ -1,6 +1,6 @@
 {
   "firmware": "1.40C",
-  "imageSha256": "b3c8dc17da6256e54b18ae6d14b82a8bd12695d6ade74fb29e9893445434c8a4",
+  "imageSha256": "76d6290a098aa083787e07da77d1718f9b1a88a3e28e3b0df7d4141f74d20d19",
   "emulatorSha256": "2360ffb244833bc015cdc84ecc36394758bf93952034a8b08a63e1955af85115",
   "setup": "Headless ot_emu; MKII panel; stopped transport; 128\u00d764 LCD at integer scale 6.",
   "palette": {
@@ -105,7 +105,7 @@
     "media/ot-out.png": "out-turned.png"
   },
   "sourceSha256": {
-    "ironoxide5.asm": "bc5d4d97a4ac50179ad4d24443dc3b3d7e97e205cdba12f46e2a72ba36c24177",
+    "ironoxide5.asm": "9968f2f90566dcf337cba7944f05b652591106480f7d2e7ff958c630da269d1a",
     "manifest.py": "7592763a186ae7cdbc0c0238495c2130e1695b65b7f8d9f795e3dfea42684a36"
   },
   "limitations": [

@@ -52,7 +52,7 @@ MODULE = Module(
         Param(b"OUT", 64, 128, active=True, formatter=Formatter.PLAIN,
               doc="output trim, -18 dB at 0 to +18 dB at 127; 64 = 0 dB (plugin default)"),
         Param(b"MIX", 127, 128, active=True, formatter=Formatter.PLAIN,
-              doc="inv/dry/wet: 0 dry plus inverted wet, 64 dry, 127 fully wet (plugin default)"),
+              doc="dry/wet: 0 dry, 127 fully wet (plugin default); the plugin's inverted half is not used"),
         Param(),
         # ---- page 2: none ----------------------------------------------------
         Param(), Param(), Param(), Param(), Param(), Param(),

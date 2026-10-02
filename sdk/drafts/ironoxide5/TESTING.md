@@ -9,7 +9,7 @@ DSP56300 tree built from `sdk/octabam/scripts/vendor.sh dsp56300` (pin
 
 | file | SHA-256 |
 |---|---|
-| `ironoxide5.asm` | `bc5d4d97a4ac50179ad4d24443dc3b3d7e97e205cdba12f46e2a72ba36c24177` |
+| `ironoxide5.asm` | `9968f2f90566dcf337cba7944f05b652591106480f7d2e7ff958c630da269d1a` |
 
 ### The render gate: `verify.py`
 
@@ -31,15 +31,17 @@ limited to ±1 as the DSP's output store is.
 Result on the revision above:
 
 ```
-assembled 657 words; init P:2000 proc P:200b
+assembled 654 words; init P:2000 proc P:200b
 [PASS] channel_l is straight-line, one rts
 [PASS] channel_r is straight-line, one rts
 [PASS] no mpysu anywhere []
 [PASS] dearest settings: zero in, zero out
 [PASS] peak error vs the plugin <= 0.001 worst 7.65e-04 at INPUT/HIGH/LOW/OUTPUT/MIX, signal ((64, 72, 72, 127, 127), 4000)
-       meter: 184.9 instructions/sample (one instance, dsp_host)
-[PASS] MIX 64 is within 2% of dry max deviation 0.0046
-[PASS] MIX 0 = dry - wet max deviation 6.44e-05
+       meter: 184.7 instructions/sample (one instance, dsp_host)
+[PASS] MIX 0 is dry at HIGH 72, LOW 72, INPUT/OUT 127 max deviation 1 LSB
+[PASS] MIX 0 is dry at HIGH 0, LOW 127, INPUT/OUT 127 max deviation 1 LSB
+[PASS] MIX 0 is dry at HIGH 127, LOW 0, INPUT/OUT 127 max deviation 1 LSB
+[PASS] MIX 64 = 63/127 dry + 64/127 wet max deviation 3.19e-05
 [PASS] stereo render == two mono renders, bit for bit
 [PASS] split 7/9 blocks == unsplit render, bit for bit
 all IRONOXIDE5 gates passed
@@ -85,7 +87,7 @@ call.
 |---|---:|
 | octabam build | 4,455 |
 | rewrite, degree-7 sine | 3,432 |
-| this version | 2,957 |
+| this version | 2,954 |
 
 The steps after the rewrite: a degree-5 minimax sine (`gen_constants.py`
 prints it; error 6.8e-5 on [0, π/2]) saves one multiply-accumulate per
@@ -114,24 +116,24 @@ With the draft copied to `sdk/octabam/modules/ironoxide5/` and
 
 ```sh
 cd sdk/octabam
-make image REMIX=ironoxide5-spring BUILD=3
+make image REMIX=ironoxide5-spring BUILD=4
 ```
 
 Built 2 Oct 2026 from the author's own OS 1.40C (MAIN OS section SHA-256
 `164f3122…0a84e`, the fingerprint `stock_guard.py` expects):
 
 ```
-IRONOXIDE5    P:0x01252..0x014e3 ( 657 words)  id 0x1e      (payload A)
-IRONOXIDE5    P:0x01012..0x012a3 ( 657 words)  id 0x1e      (payload B)
-region P:...  (1063 words)  used 657  FREE 406
-out/mainos_bus.bin: 1,112,560 bytes, 3847 changed
+IRONOXIDE5    P:0x01252..0x014e0 ( 654 words)  id 0x1e      (payload A)
+IRONOXIDE5    P:0x01012..0x012a0 ( 654 words)  id 0x1e      (payload B)
+region P:...  (1063 words)  used 654  FREE 409
+out/mainos_bus.bin: 1,112,560 bytes, 3831 changed
 ```
 
 | artifact (local only, never committed) | SHA-256 |
 |---|---|
-| `out/mainos_bus.bin` | `b3c8dc17da6256e54b18ae6d14b82a8bd12695d6ade74fb29e9893445434c8a4` |
-| `out/OCTATRACK_OCTABAM3.bin` | `47c30f156bc40e991140961ef33a3365afad8b27ff3e18c1296b730ec9d25834` |
-| `out/OCTATRACK_OS1.40C_OCTABAM3.syx` | `dc00a2541536ba2229c20adb66b945aa19285a04e736a96dc0d1da06e4433ca8` |
+| `out/mainos_bus.bin` | `76d6290a098aa083787e07da77d1718f9b1a88a3e28e3b0df7d4141f74d20d19` |
+| `out/OCTATRACK_OCTABAM4.bin` | `47c30f156bc40e991140961ef33a3365afad8b27ff3e18c1296b730ec9d25834` |
+| `out/OCTATRACK_OS1.40C_OCTABAM4.syx` | `dc00a2541536ba2229c20adb66b945aa19285a04e736a96dc0d1da06e4433ca8` |
 
 `make_bin.py` round-trips the card image (payload and checksum ok).
 Composed-image render: `benchmark.py`'s IRONOXIDE5 dump, one instance at
@@ -153,12 +155,12 @@ block in the modulated cases, all 16 trigger-split positions. The unit is
 
 | case | IronOxide5 | SPRING REV |
 |---|---:|---:|
-| one instance, fixed controls, per 16-sample block | 2,957 | 4,186 |
-| one instance, per sample | 184.8 | 261.6 |
-| four per core, fixed controls, peak per block | 11,828 | 16,744 |
-| four per core, modulated, peak per block | 11,832 | 16,748 |
-| four per core, worst of all splits, peak per block | 13,168 | 20,376 |
-| per core, per sample, worst | 823.0 | 1,273.5 |
+| one instance, fixed controls, per 16-sample block | 2,954 | 4,186 |
+| one instance, per sample | 184.6 | 261.6 |
+| four per core, fixed controls, peak per block | 11,816 | 16,744 |
+| four per core, modulated, peak per block | 11,820 | 16,748 |
+| four per core, worst of all splits, peak per block | 13,144 | 20,376 |
+| per core, per sample, worst | 821.5 | 1,273.5 |
 | init, per core | 44 | 380 |
 
 SPRING REV's figures are identical to the TapeHead run and to the Mini Verb
@@ -168,7 +170,7 @@ Memory:
 
 | | IronOxide5 | SPRING REV |
 |---|---:|---:|
-| DSP program, per payload | 657 words | 1,063 words |
+| DSP program, per payload | 654 words | 1,063 words |
 | FX2 instance buffer (allocator) | none | 16,384 words per instance slot |
 | per-instance state | 28 words of its r7 block | not measured |
 | ColdFire | cloned descriptor | stock descriptor |
@@ -198,8 +200,8 @@ SHA-256, source SHA-256 and results.
 ## Resources
 
 - DSP cycles: 194 cycles/sample per instance, static, the same at every
-  setting. dsp_host meter: 184.9 instructions/sample.
-- DSP program: 657 words (1,971 bytes at 24 bits) in each payload's donor
+  setting. dsp_host meter: 184.7 instructions/sample.
+- DSP program: 654 words (1,962 bytes at 24 bits) in each payload's donor
   region.
 - DSP X: 28 words per instance (r7 + $00–$1b) inside the dispatcher's own
   256-word r7 block. No allocator buffer, no Y memory.
@@ -207,4 +209,16 @@ SHA-256, source SHA-256 and results.
 
 ## Hardware
 
-Untested. The octabam build was never heard on a unit either.
+2 Oct 2026, OCTABAM3 on the author's unit: with MIX at 0, HIGH and LOW still
+changed the sound. Cause: OCTABAM3 kept the plugin's inv/dry/wet knob, where
+0 is dry plus the wet signal inverted (dry was at 64). That matched the
+plugin and `verify.py` then (its gate checked "MIX 0 = dry - wet"), so no
+render could flag it; it is a control-design problem, not an arithmetic one.
+
+Fixed in OCTABAM4: MIX is now the plugin's upper half only (G = 0.5 +
+MIX/254), so 0 is dry and 127 fully wet. `verify.py` now checks MIX 0 is dry
+within 1 LSB with INPUT and OUT at 127 and HIGH/LOW at both extremes. Only
+the MIX setup changed: 3 words less, 3 instructions per block less, the
+LCD captures pixel-identical. OCTABAM4 has not been flashed.
+
+The octabam build was never heard on a unit.

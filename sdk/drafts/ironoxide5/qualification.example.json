@@ -1,6 +1,6 @@
 {
   "moduleVersion": "0.1.0-experimental",
-  "sourceSha256": "bc5d4d97a4ac50179ad4d24443dc3b3d7e97e205cdba12f46e2a72ba36c24177",
+  "sourceSha256": "9968f2f90566dcf337cba7944f05b652591106480f7d2e7ff958c630da269d1a",
   "imageSha256": "REPLACE_WITH_LOCAL_TESTED_IMAGE_SHA256",
   "cycles": [
     {
@@ -13,7 +13,7 @@
       "method": "static",
       "conditions": {
         "parameterExtremes": "Static count: the sample loop has no branch; the per-block fits branch on HIGH's and the trims' segments, all priced. verify.py renders every knob at 0 and 127 and mixed settings. Hardware: pending.",
-        "parameterModulation": "Pending on hardware. Knobs are read once per block, so modulation changes no per-sample cost; benchmark.py moves every control every block (11,832 vs 11,828 instructions per block fixed).",
+        "parameterModulation": "Pending on hardware. Knobs are read once per block, so modulation changes no per-sample cost; benchmark.py moves every control every block (11,820 vs 11,816 instructions per block fixed).",
         "modeSwitching": "Pending: repeated FX reselection, NONE bypass and Part changes on hardware.",
         "maxLoad": "Static: eight instances per core (FX1 and FX2 on four tracks) = 1,552 cycles/sample against 3,120 usable. Not measured on hardware or in a composed image.",
         "inputConditions": "verify.py: silence, a 0.9 impulse, a 0.5 step and 50 Hz-12 kHz tones at -2 dBFS. Full-scale and DC worst cases on hardware pending."
@@ -26,9 +26,9 @@
       {
         "name": "ironoxide5.asm program (one copy per payload)",
         "space": "dsp-p",
-        "words": 657,
+        "words": 654,
         "wordBits": 24,
-        "bytes": 1971,
+        "bytes": 1962,
         "scope": "shared"
       },
       {
@@ -44,7 +44,7 @@
     "sharedBytes": 1971,
     "maxInstances": 16,
     "totalBytes": 3315,
-    "conditions": "Composed build report for ironoxide5-spring: 657 words in each payload's donor region. The r7 words lie inside the dispatcher's existing 256-word block for the slot. This record counts one payload's program.",
+    "conditions": "Composed build report for ironoxide5-spring: 654 words in each payload's donor region. The r7 words lie inside the dispatcher's existing 256-word block for the slot. This record counts one payload's program.",
     "report": "TESTING.md"
   },
   "hardware": {
@@ -83,7 +83,7 @@
       "steps": [
         "On a track playing a drum or bass loop, hold FUNC and press FX2, turn LEVEL to IRONOXIDE5 and press YES. Press FX2 to see INPUT, HIGH, LOW, OUT and MIX at their defaults.",
         "Turn INPUT up to about 90 for more saturation and OUT down to about 50 to keep the level. Lower HIGH towards 40 for a darker, slower tape; raise LOW to thin the bass.",
-        "Set MIX to 64 to hear the dry track, then back to 127. Re-selecting IRONOXIDE5 clears its internal state."
+        "Turn MIX to 0 to hear the dry track, then back to 127. Re-selecting IRONOXIDE5 clears its internal state."
       ]
     },
     "screenshots": [

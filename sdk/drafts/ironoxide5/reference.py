@@ -65,8 +65,10 @@ class IronOxide5:
 
 
 def from_knobs(inp, high, low, out, mix):
-    """The panel's mapping: A, B, C, F = knob/128; G = MIX/127."""
-    return IronOxide5(inp / 128.0, high / 128.0, low / 128.0, out / 128.0, mix / 127.0)
+    """The panel's mapping: A, B, C, F = knob/128. MIX is a plain dry/wet over
+    the upper half of the plugin's inv/dry/wet knob: G = 0.5 + MIX/254, so
+    MIX 0 is dry (G = 0.5) and MIX 127 fully wet (G = 1)."""
+    return IronOxide5(inp / 128.0, high / 128.0, low / 128.0, out / 128.0, 0.5 + mix / 254.0)
 
 
 def render(knobs, xs):

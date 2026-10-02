@@ -17,7 +17,8 @@ Gates:
   4. Peak error against reference.py <= 1e-3 over nine knob settings
      (defaults, every extreme, mixed) x impulse, step and 50 Hz-12 kHz
      tones at -2 dBFS. The octabam source measured 2.0 here.
-  5. MIX 64 is (almost) dry and MIX 0 adds the inverted wet, as in the plugin.
+  5. MIX 0 is dry (within 1 LSB) whatever the other knobs do, and MIX 64
+     is the linear blend.
   6. L and R are independent: a stereo render equals two mono renders.
   7. The A/B flip survives a block boundary: one render in 16-sample blocks
      equals the reference sample for sample (covered by 4), and odd-length
@@ -180,13 +181,14 @@ def main():
 
         # 5. MIX
         x = signal(1000, 1600)
-        dry, _ = run(work, mem, syms, [64, 72, 72, 64, 64], x, tag="mix64")
-        e = max(abs(a - b) for a, b in zip(dry[0::2], x)) / Q
-        gate("MIX 64 is within 2% of dry", e < 0.02, f"max deviation {e:.4f}")
-        inv, _ = run(work, mem, syms, [64, 72, 72, 64, 0], x, tag="mix0")
+        for high, low in ((72, 72), (0, 127), (127, 0)):
+            dry, _ = run(work, mem, syms, [127, high, low, 127, 0], x, tag="mix0")
+            e = max(abs(a - b) for a, b in zip(dry[0::2], x))
+            gate(f"MIX 0 is dry at HIGH {high}, LOW {low}, INPUT/OUT 127", e <= 1, f"max deviation {e} LSB")
+        half, _ = run(work, mem, syms, [64, 72, 72, 64, 64], x, tag="mix64")
         wet, _ = run(work, mem, syms, [64, 72, 72, 64, 127], x, tag="mix127")
-        e = max(abs(i - (d - w)) for i, d, w in zip(inv[0::2], x, wet[0::2])) / Q
-        gate("MIX 0 = dry - wet", e < 2e-3, f"max deviation {e:.2e}")
+        e = max(abs(h - (d * 63 / 127 + w * 64 / 127)) for h, d, w in zip(half[0::2], x, wet[0::2])) / Q
+        gate("MIX 64 = 63/127 dry + 64/127 wet", e < 2e-3, f"max deviation {e:.2e}")
 
         # 6. stereo independence
         left, right = signal(220, 1600), signal(4000, 1600)

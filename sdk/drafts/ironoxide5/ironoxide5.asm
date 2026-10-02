@@ -47,7 +47,8 @@
 ;   $1b KEEP = 1 - IIRAMOUNT
 ;
 ; Knobs (page 1, value<<16 = value/128): 0 INPUT, 1 HIGH (ips), 2 LOW (lps),
-; 3 OUTPUT, 4 MIX. MIX is scaled by 128/127 so 127 is fully wet.
+; 3 OUT, 4 MIX. MIX is a plain dry/wet, scaled by 128/127 so 127 is fully
+; wet and 0 is dry (the upper half of the plugin's inv/dry/wet knob).
 ; ---------------------------------------------------------------------------
 
 init:
@@ -265,21 +266,20 @@ b_done:
         bsr     trimgain_fit
         move    a,x:(r7+$0a)             ; OUTPUTGAIN (shift3)
 
-; ---- MIX: G = raw/127, invdrywet = 2G - 1, dry = 1 - invdrywet when > 0 --
+; ---- MIX: a plain dry/wet. wet = raw/127 (127 -> 1.0), dry = 1 - wet. --
+; The plugin's knob is inv/dry/wet (0 = dry plus INVERTED wet, 0.5 = dry);
+; MIX covers its upper half, so MIX = 0 is dry and the tape path is silent.
         move    x:(r6+$4),x0             ; raw/128
         move    #>$010204,y0             ; 1/127
         mpy     y0,x0,a                  ; raw/128/127
-        add     x0,a                     ; raw/127 (127 -> 1.0, held in a)
-        move    a,b
-        add     b,a                      ; 2G
-        move    #>$800000,x0
-        add     x0,a                     ; 2G - 1 = invdrywet (1.0 at 127)
+        add     x0,a                     ; wet = raw/127, held in a
         move    a,b                      ; keep the unsaturated value
-        move    a,x:(r7+$10)             ; invdrywet, limited to 0.99999
+        move    a,x:(r7+$10)             ; wet, limited to 0.99999
         tst     b
         ble     g_dry_max
-        add     x0,b                     ; invdrywet - 1
-        neg     b                        ; dry = 1 - invdrywet (0 at 127)
+        move    #>$800000,x0
+        add     x0,b                     ; wet - 1
+        neg     b                        ; dry = 1 - wet (0 at 127)
         bra     g_dry_done
 g_dry_max:
         move    #>$7FFFFF,b              ; dry = 1.0
@@ -287,7 +287,7 @@ g_dry_done:
         move    b,x:(r7+$0e)             ; DRY
 
         move    x:(r7+$0a),y1            ; OUTPUTGAIN (shift3)
-        move    x:(r7+$10),y0            ; invdrywet
+        move    x:(r7+$10),y0            ; wet
         mpy     y1,y0,a
         move    a,x:(r7+$0f)             ; WETGAIN (shift3)
 

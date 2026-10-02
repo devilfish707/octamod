@@ -50,10 +50,13 @@ controls.
 | 1 | HIGH | 72 | 0–127 | Tape speed, 1.65 to 165 ips as knob⁴. Higher is brighter and tighter; 72 is the plugin's 15 ips. |
 | 2 | LOW | 72 | 0–127 | Tape low: the highpass before the saturator. Higher values cut more bass. |
 | 3 | OUT | 64 | 0–127 | Output trim of the wet signal, −18 to +18 dB; 64 is 0 dB. |
-| 4 | MIX | 127 | 0–127 | Inv/dry/wet: 0 is dry plus inverted wet, 64 dry, 127 fully wet. |
+| 4 | MIX | 127 | 0–127 | Dry/wet: 0 is dry, 127 fully wet. |
 
 The plugin's sliders map directly: INPUT, HIGH, LOW and OUT are the slider
-value × 128, MIX × 127. The defaults are the plugin's.
+value × 128. The plugin's last knob is inv/dry/wet: its lower half adds the
+wet signal *inverted* to the dry, and dry is at its middle. MIX covers only
+the upper half, dry at 0 to fully wet at 127, so at MIX 0 the tape path is
+silent whatever the other knobs do. The defaults are the plugin's.
 
 ## Usage
 
@@ -63,13 +66,13 @@ value × 128, MIX × 127. The defaults are the plugin's.
 3. Press FX2 (or FX1) for the main page.
 
 A useful start on drums or bass: INPUT 90, OUT 50, HIGH 60, LOW 72, MIX 127.
-Bring OUT up until the level matches the effect bypassed.
+Bring OUT up until the level matches MIX 0 (dry).
 
 ## Quick tutorial: put a loop on tape
 
 1. **Set up.** On a track playing a drum or bass loop, hold FUNC and press FX2, turn LEVEL to IRONOXIDE5 and press YES. Press FX2 to see INPUT, HIGH, LOW, OUT and MIX at their defaults.
 2. **Drive it.** Turn INPUT up to about 90 for more saturation and OUT down to about 50 to keep the level. Lower HIGH towards 40 for a darker, slower tape; raise LOW to thin the bass.
-3. **Compare.** Set MIX to 64 to hear the dry track, then back to 127. Re-selecting IRONOXIDE5 clears its internal state.
+3. **Compare.** Turn MIX to 0 to hear the dry track, then back to 127. Re-selecting IRONOXIDE5 clears its internal state.
 
 ## Compatibility and limitations
 
@@ -82,8 +85,10 @@ Bring OUT up until the level matches the effect bypassed.
 - 44.1 kHz, as the plugin's coefficients assume.
 - OUT above 64 can push the output past full scale, where the DSP's output
   store limits it.
-- MIX 127 is fully wet. Between 64 and 127 the dry share falls linearly, as
-  in the plugin.
+- MIX is a plain dry/wet; the plugin's inverted half is not available. (The
+  OCTABAM3 test image still had it: MIX 0 there was dry plus inverted wet,
+  so HIGH and LOW still changed the sound. Reported on hardware 2 Oct 2026,
+  fixed in OCTABAM4.)
 - 194 cycles/sample per instance by the static counter, the same at every
   setting. Eight instances on one core (FX1 and FX2 on four tracks) price at
   1,552 of the 3,120 cycles/core modules may use.
@@ -98,8 +103,8 @@ See [TESTING.md](TESTING.md) for commands and numbers. In short:
   `ironoxide5.asm`, runs it in `dsp_host` and compares it with
   `reference.py`, a line-for-line port of `IronOxide5Proc.cpp`. Peak error
   is 7.7e-4 over nine knob settings (defaults, every extreme, mixed) × seven
-  signals. Silence in gives silence out; MIX 64 is within 0.5% of dry and
-  MIX 0 is dry minus wet; the stereo channels are independent; the sample
+  signals. Silence in gives silence out; MIX 0 is dry within 1 LSB at any
+  setting and MIX 64 is the linear blend; the stereo channels are independent; the sample
   routines are straight-line; no `mpysu` remains; split blocks match unsplit
   ones bit for bit, so the A/B alternation survives a call boundary. In the
   composed test image it renders within 1.8e-4 of the plugin at the
@@ -109,8 +114,8 @@ See [TESTING.md](TESTING.md) for commands and numbers. In short:
   | | IronOxide5 | Spring Reverb |
   |---|---:|---:|
   | one instance, instructions per sample | 185 | 262 |
-  | four per core, worst peak per 16-sample block | 13,168 | 20,376 |
-  | DSP program | 657 words | 1,063 words |
+  | four per core, worst peak per 16-sample block | 13,144 | 20,376 |
+  | DSP program | 654 words | 1,063 words |
   | FX2 instance buffer | none | 16,384 words |
   | state | 28 words of its r7 block | — |
 
@@ -124,13 +129,15 @@ See [TESTING.md](TESTING.md) for commands and numbers. In short:
      count. It now uses r4/r5, swapped every sample.
 - **Optimised:** a degree-5 minimax sine replaces the degree-7 one (error
   6.8e-5), the highpass update takes three fewer instructions, and a
-  shift pair folds away. One instance went from 4,455 to 2,957 executed
+  shift pair folds away. One instance went from 4,455 to 2,954 executed
   instructions per block, 34% less than the octabam build.
 - **Composed build:** `ironoxide5-spring` builds, packs into
-  `OCTATRACK_OCTABAM3.bin` with a valid checksum, boots in the emulator and
+  `OCTATRACK_OCTABAM4.bin` with a valid checksum, boots in the emulator and
   draws the chooser and page below. `verify_menu`, `verify_initregs`,
   `verify_replaces --image` and `label_fmt` pass.
-- **Not done:** a flash, the 60-minute eight-track hardware stress project
+- **On hardware:** OCTABAM3 was flashed on 2 Oct 2026; its MIX 0 was not dry
+  (fixed in OCTABAM4, see Compatibility). OCTABAM4 has not been flashed.
+- **Not done:** the 60-minute eight-track hardware stress project
   and worst-case cycles measured on hardware.
 
 ## Authorship and licences
@@ -167,7 +174,7 @@ reconstruction. No audio is included.
 | `reference.py` | the plugin's processing in Python, and the knob mapping |
 | `gen_constants.py` | octabam's generator for the per-block coefficient fits |
 | `benchmark.py` | instruction counts against stock SPRING REV (needs your local 1.40C) |
-| `hardware-test-remix.py` | the remix the OCTABAM3 test image was built from |
+| `hardware-test-remix.py` | the remix the OCTABAM4 test image was built from |
 | `octamod.module.json` | website metadata |
 | `qualification.example.json` | the qualification record, incomplete |
 | `presentation/thumbnail.svg` | the card illustration |
