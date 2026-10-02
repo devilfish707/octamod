@@ -322,4 +322,5 @@ SHA-256 and results.
 
 ## Hardware
 
-Untested.
+OCTABAM5 was never flashed. OCTABAM9 (the input-level fix) was: see the
+hardware entry in the input-level section at the top.
