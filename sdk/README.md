@@ -8,6 +8,8 @@ The initial import includes **Spectrum, Modulation, Character, Mini Verb, Tape E
 
 CC Map, requested on 2 October 2026, is a pinned [source draft](drafts/cc-map/README.md) outside native discovery, source-package compilation and the public catalog. Its [import record](imports/cc-map-8d0ad6f.json) preserves Sam Banks’ MIT licence, exact source identities and the lazy stock-vector guard adaptation. An original thumbnail, tutorial and six actual monochrome MKII emulator LCD captures are included. Full qualification, native/browser integration and owner review remain required. The eleven-module baseline is unchanged; its upstream FX2 block targets BusDelay/BusVerb, which remain outside scope.
 
+Inflator, requested on 2 October 2026, is an original [source draft](drafts/inflator/README.md): JClones' OInflator (MIT), an Oxford Inflator clone with an optional three-band split, on the DSP. It replaces the RCInflator 2 port in the author's octabam tree, which carries no licence. Its `verify.py` runs the assembled code in `dsp_host` with no firmware against the JSFX line for line; `benchmark.py` measures it against stock SPRING REV, `hardware-test-remix.py` builds a test image with Inflator in Spring Reverb's chooser row, and emulator LCD captures are included. It stays outside native discovery and the catalog until hardware qualification and owner review are complete.
+
 ## Start without firmware or native compilation
 
 Use Node 24 from the monorepo root:

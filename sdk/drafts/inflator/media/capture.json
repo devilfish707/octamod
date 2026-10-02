@@ -1,0 +1,121 @@
+{
+  "firmware": "1.40C",
+  "imageSha256": "4ec513e79009dca117ec054312a2265e7b76f3b689fdbb960920e4be91eb5cc6",
+  "emulatorSha256": "2360ffb244833bc015cdc84ecc36394758bf93952034a8b08a63e1955af85115",
+  "setup": "Headless ot_emu; MKII panel; stopped transport; 128\u00d764 LCD at integer scale 6.",
+  "palette": {
+    "on": [
+      240,
+      240,
+      240
+    ],
+    "off": [
+      24,
+      24,
+      24
+    ]
+  },
+  "keyMs": 150,
+  "plan": [
+    {
+      "wait": 3000
+    },
+    {
+      "press": [
+        "YES"
+      ]
+    },
+    {
+      "wait": 2000
+    },
+    {
+      "press": [
+        "NO"
+      ]
+    },
+    {
+      "press": [
+        "FUNC",
+        "FX2"
+      ]
+    },
+    {
+      "encoder": {
+        "name": "LEVEL",
+        "delta": -20
+      }
+    },
+    {
+      "encoder": {
+        "name": "LEVEL",
+        "delta": 13
+      }
+    },
+    {
+      "press": [
+        "YES"
+      ]
+    },
+    {
+      "capture": "location.png"
+    },
+    {
+      "press": [
+        "FX2"
+      ]
+    },
+    {
+      "capture": "controls.png"
+    },
+    {
+      "encoder": {
+        "name": "B",
+        "delta": 90
+      }
+    },
+    {
+      "encoder": {
+        "name": "E",
+        "delta": 1
+      }
+    },
+    {
+      "capture": "split-on.png"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "media/ot-location.png",
+      "sha256": "e1d46ea91ec401509f768e044820571de8a10b84b379e5d82e8b348a2e60af07"
+    },
+    {
+      "path": "media/ot-controls.png",
+      "sha256": "c6f0998b95f84e2eb13a93f4729359a2d1e343a9a7c5423153b3d11dc7f0667f"
+    },
+    {
+      "path": "media/ot-split.png",
+      "sha256": "2a3dc840e5c0d0882993010e3bc4ddd8fdd9ddfcd923de3f7a32d8c3a026bc19"
+    }
+  ],
+  "moduleId": "inflator",
+  "moduleVersion": "0.1.0-experimental",
+  "captured": "2026-10-02",
+  "imageProfile": {
+    "remix": "inflator-spring (hardware-test-remix.py)",
+    "fx2Row": "INFLATOR in SPRING REV's position",
+    "staticStock": true
+  },
+  "captureFiles": {
+    "media/ot-location.png": "location.png",
+    "media/ot-controls.png": "controls.png",
+    "media/ot-split.png": "split-on.png"
+  },
+  "sourceSha256": {
+    "inflator.asm": "fcb1db5edf5f93f3b0f952098cc9963f08fa932258336f0975f7bfdad2acd8ba",
+    "manifest.py": "ed8a729f865192dd5209205da687ad18271a990466e8419ad95c782e1bcfb606"
+  },
+  "limitations": [
+    "Emulator UI evidence only; no hardware, audio or stress qualification.",
+    "Empty scratch card, no samples or projects."
+  ]
+}
