@@ -7,7 +7,7 @@
   "category": "machines",
   "source": {
     "repository": "https://github.com/devilfish707/Octaplay",
-    "revision": "1d2e9dc2bada2fea79d1ba07a8a56e1812a20ad8",
+    "revision": "9a8e9afbc9ff6103c77f693f12011daf06c28dff",
     "path": "playmodes"
   },
   "author": {
@@ -64,20 +64,20 @@
     ]
   },
   "resources": {
-    "recorded": "7 October 2026: emulator instruction counts and build-report memory; chip timing unmeasured",
+    "recorded": "8 October 2026: emulator counts and build memory (build 20); chip timing unmeasured",
     "storage": {
       "label": "DRAM data + battery RAM",
-      "display": "13,724 B: 11,414 B unit in DRAM + 2,310 B battery RAM",
-      "value": 13724,
+      "display": "14,252 B: 11,942 B unit in DRAM + 2,310 B battery RAM",
+      "value": 14252,
       "unit": "bytes",
       "method": "static",
-      "conditions": "Code 6,628, read-only data 102, state and pattern table 4,684 (SDRAM platform reserve), battery table 2,310 (CS1). All shared; stack at most 104 bytes. See evidence/memory.md.",
+      "conditions": "Code 7,140, read-only data 102, state and pattern table 4,700 (SDRAM platform reserve), battery table 2,310 (CS1). All shared; stack at most 116 bytes. See evidence/memory.md.",
       "source": "evidence/memory.md"
     },
     "processing": {
       "label": "ColdFire processing",
-      "display": "≤ 4,206 instructions per track step (1,726 measured)",
-      "value": 4206,
+      "display": "≤ 4,331 instructions per track step (1,860 measured)",
+      "value": 4331,
       "unit": "instructions/event",
       "method": "emulator",
       "conditions": "Instruction counts of the module's own code in octabam's ColdFire core, no firmware, synthetic sequencer state; SHUFFLE's walk bounded analytically. Chip cycles: 32-cycle-per-instruction allowance, not measured.",
@@ -107,21 +107,21 @@
   },
   "tests": {
     "report": "TESTING.md",
-    "summary": "Host suites for the engine and firmware glue pass; instruction counts in octabam's ColdFire core bound one track step at 4,206 instructions (1,726 measured); the author ran build 19 on an MKII for about 15 minutes (functional report). No stress run, no chip timing.",
+    "summary": "Host suites for the engine and firmware glue pass; instruction counts in octabam's ColdFire core bound one track step at 4,331 instructions (1,860 measured); the author ran builds 12–20 on an MKII (functional report). No stress run, no chip timing.",
     "hardwareStatus": "reported",
-    "evidenceRevision": "1d2e9dc2bada2fea79d1ba07a8a56e1812a20ad8",
+    "evidenceRevision": "9a8e9afbc9ff6103c77f693f12011daf06c28dff",
     "gates": [
       "modules/playmodes/verify.py"
     ],
     "qualification": {
       "moduleVersion": "0.1.0-experimental",
-      "sourceSha256": "bc2a7b45ca856ba03591fa4516c0e871ef5139c4972343bb22315d6116876fce",
+      "sourceSha256": "081715fa3915fc29e1a0c9e5c9c7bc934c4a39a3d0df9bf18f0f4c0423ddd048",
       "imageSha256": "24d22dc0d10e7328fca57e8eec3930b2690ae2f55ec3bf2f5e2e9075a11d87f6",
       "cycles": [
         {
           "processor": "coldfire",
-          "worstCase": 134592,
-          "maxConfiguration": 2153472,
+          "worstCase": 138592,
+          "maxConfiguration": 2217472,
           "maxInstances": 16,
           "budget": 6600000,
           "unit": "cycles/event",
@@ -130,7 +130,7 @@
             "parameterExtremes": "Every mode, track lengths 1–64, MASTER LENGTH INF and 0, all seven track scales across the 16 tracks.",
             "parameterModulation": "No knob, LFO or p-lock reaches the module; mode changes by TRACK + UP / DOWN measured separately (543 instructions). Scenes, LFOs and locks are stock and unchanged.",
             "modeSwitching": "Every mode and both scale modes, with a PLAY restart on every run; pattern-row reloads on pattern switches included.",
-            "maxLoad": "All 16 tracks (8 audio, 8 MIDI) in one step, SHUFFLE at the longest walk (length 33), every track restarting: bounded at 67,296 instructions; budget one step at 300 BPM, 2X scale, 264 MHz.",
+            "maxLoad": "All 16 tracks (8 audio, 8 MIDI) in one step, SHUFFLE at the longest walk (length 33), every track restarting: bounded at 69,296 instructions; budget one step at 300 BPM, 2X scale, 264 MHz.",
             "inputConditions": "No audio path. 60 SHUFFLE seeds per length; the walk length bound (32) from the permutation's construction, its cost measured as 101 + 98 × walk."
           },
           "report": "evidence/cycles.md"
@@ -141,9 +141,9 @@
           {
             "name": "Code: C engine and glue, 35 detour stubs and entries",
             "space": "sdram",
-            "words": 6628,
+            "words": 7140,
             "wordBits": 8,
-            "bytes": 6628,
+            "bytes": 7140,
             "scope": "shared"
           },
           {
@@ -155,11 +155,11 @@
             "scope": "shared"
           },
           {
-            "name": "State, flags, popup text, project line and the 256-pattern mode table",
+            "name": "State, flags, popup text, project line, computed track lengths and the 256-pattern mode table",
             "space": "sdram",
-            "words": 4684,
+            "words": 4700,
             "wordBits": 8,
-            "bytes": 4684,
+            "bytes": 4700,
             "scope": "shared"
           },
           {
@@ -172,21 +172,21 @@
           }
         ],
         "perInstanceBytes": 0,
-        "sharedBytes": 13724,
+        "sharedBytes": 14252,
         "maxInstances": 16,
-        "totalBytes": 13724,
-        "conditions": "From the build-19 runtime ELF and the battery layout; one table for all tracks and patterns, no per-track copies; stack at most 104 bytes below the caller (measured); no heap, DSP memory or cave space. The platform reserve's 10 MB is shared by every DRAM module.",
+        "totalBytes": 14252,
+        "conditions": "From the build-20 runtime ELF and the battery layout; one table for all tracks and patterns, no per-track copies; stack at most 116 bytes below the caller (measured); no heap, DSP memory or cave space. The platform reserve's 10 MB is shared by every DRAM module.",
         "report": "evidence/memory.md"
       },
       "hardware": {
         "kind": "functional",
         "status": "reported",
         "model": "MKII",
-        "testedOn": "2026-10-07",
+        "testedOn": "2026-10-08",
         "tester": "devilfish707",
-        "sourceRevision": "1d2e9dc2bada2fea79d1ba07a8a56e1812a20ad8",
+        "sourceRevision": "9a8e9afbc9ff6103c77f693f12011daf06c28dff",
         "imageSha256": "24d22dc0d10e7328fca57e8eec3930b2690ae2f55ec3bf2f5e2e9075a11d87f6",
-        "summary": "On an Octatrack MKII the author ran build 19 (this source) for about 15 minutes after builds 12–18: PINGPONG 2, per-pattern modes, save and reload, a power cycle, pattern copy and paste (also to other banks) and clear pattern all worked as described.",
+        "summary": "On an Octatrack MKII the author ran builds 12–19 (3–7 Oct; build 19 for about 15 minutes: PINGPONG 2, per-pattern modes, save and reload, a power cycle, pattern copy and paste also to other banks, clear pattern) and build 20 (this source, 8 Oct), which fixes a reported length mismatch after switching NORMAL to PER TRACK scale mode.",
         "limitations": [
           "A short interactive report, not a timed stress run; no audio or timing measurement.",
           "One MKII; no MKI.",
