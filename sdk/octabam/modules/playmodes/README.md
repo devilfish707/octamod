@@ -6,7 +6,7 @@ The sequencer's playhead in six directions, per pattern, shared by every
 track or set per track. ColdFire-only (no DSP code, no effect slot), for
 original OS 1.40C.
 
-**Experimental.** Played on the author's MKII in test images (builds 12–21,
+**Experimental.** Played on the author's MKII in test images (builds 12–22,
 3–8 Oct 2026); not stress-tested, chip timing unmeasured. See
 [TESTING.md](TESTING.md).
 
@@ -90,7 +90,9 @@ before that restart: REVERSED then plays 16 → 1, the mirror of what NORMAL
 plays. Set MASTER LENGTH to INF to let each track run its full length.
 Each track also follows where the stock playhead really wraps, so a mode
 always works on the steps the track actually plays; NORMAL is always the
-stock step.
+stock step. When MASTER LENGTH starts the tracks over, PINGPONG and
+PINGPONG 2 start their bounce again from step 1, RANDOM and SHUFFLE a new
+order.
 With INF a pattern never reaches its end, so a queued pattern change waits
 for CHAIN AFTER; a pattern on USE PAT SET. with PAT.LEN never changes
 (stock behaviour): choose USE PRJ SET. or give it its own CHAIN AFTER.

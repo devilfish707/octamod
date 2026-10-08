@@ -3,7 +3,7 @@
 ## Commands and exact revision
 
 Source: [devilfish707/Octaplay](https://github.com/devilfish707/Octaplay)
-`playmodes/` at commit `82b447f` (build 21 source, `playmodes.s` generated
+`playmodes/` at commit `71f4606` (build 22 source, `playmodes.s` generated
 with the author's m68k-elf-gcc, 8 Oct 2026); this folder is that source
 with `manifest.py`'s category set to MACHINES, without the firmware probe
 `investigate.py` (it stays in Octaplay).
@@ -44,7 +44,8 @@ What the host suites cover:
   plays 16, and the reverse; a length edit is taken at once; NORMAL passes
   every step through; MASTER LENGTH uses the MASTER SCALE (`0x8e52`); a
   14-step track under MASTER LENGTH 16 (stock 0..13, 0, 1) keeps 14 as its
-  length, REVERSED 14..1, 14, 13.
+  length, REVERSED 14..1, 14, 13; PINGPONG 1..14, 13, 12 and PINGPONG 2
+  1..14, 14, 13 every master loop.
 - Per pattern: two patterns keep their own modes across switches.
 - The project lines: their exact text, one per pattern that is not all
   NORMAL, a storing load pass starting from NORMAL, the parse-only pass
@@ -75,7 +76,8 @@ interactive sessions per build, not timed; no stress project.
 | 17 | Modes saved with the project (one set for all patterns then). Found: the set was shared by every pattern. |
 | 18–19 | Per-pattern modes, battery RAM table, pattern copy / paste / undo, clear, PINGPONG 2. About 15 minutes on build 19: PINGPONG 2, save / reload, power cycle, copy / paste (also to other banks) and clear all work ([evidence/hardware.md](evidence/hardware.md)). Found: NORMAL scale mode LEN 10, switched to PER TRACK (16/16), still played 10 steps. |
 | 20 | Each track's length follows where the stock playhead really wraps; NORMAL passes every step through; the PER TRACK master cut uses the MASTER SCALE. The reported case is fixed on the unit. Found: PER TRACK, a 14-step track, MASTER LENGTH 16, REVERSED started on step 5 and looped steps 1–2 (MASTER LENGTH's 2-step pass taken as the length). |
-| 21 | The longest pass is kept, so MASTER LENGTH's short passes no longer count as the length. Reported working on the unit. |
+| 21 | The longest pass is kept, so MASTER LENGTH's short passes no longer count as the length. REVERSED works. Found: PINGPONG drifted across master loops instead of starting over. |
+| 22 | A MASTER LENGTH restart starts PINGPONG and PINGPONG 2 over from step 1; RANDOM and SHUFFLE start a new order. Reported working on the unit. |
 
 No audio artefacts were heard; audio was not measured (the module adds no
 DSP and changes only which step's trig fires).
@@ -98,15 +100,15 @@ DSP and changes only which step's trig fires).
 
 Instruction counts of the module's own code in octabam's ColdFire emulator
 core (no firmware), with a 32-cycles-per-instruction allowance:
-[evidence/cycles.md](evidence/cycles.md). One track step: 1,860
-instructions measured (SHUFFLE), bounded at 4,331; sixteen tracks: 69,296
-instructions, 2,217,472 cycles, against 6,600,000 for one step at 300 BPM
+[evidence/cycles.md](evidence/cycles.md). One track step: 1,864
+instructions measured (SHUFFLE), bounded at 4,503; sixteen tracks: 72,048
+instructions, 2,305,536 cycles, against 6,600,000 for one step at 300 BPM
 and 2X scale. No chip timing, no `evidence/performance.json` (perf:audit)
 yet.
 
 ## Resources
 
-14,264 bytes, all shared: code 7,152, read-only data 102, state and the
+14,744 bytes, all shared: code 7,632, read-only data 102, state and the
 pattern table 4,700 (SDRAM platform reserve), battery table 2,310 (CS1
 `0x100f8600..0x100f8f06`); stack at most 116 bytes; no heap, DSP memory,
 cave space or effect ID. 35 detours, each guarded by the SHA-256 of the
