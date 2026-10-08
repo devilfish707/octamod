@@ -3,7 +3,7 @@
 ## Commands and exact revision
 
 Source: [devilfish707/Octaplay](https://github.com/devilfish707/Octaplay)
-`playmodes/` at commit `9a8e9af` (build 20 source, `playmodes.s` generated
+`playmodes/` at commit `82b447f` (build 21 source, `playmodes.s` generated
 with the author's m68k-elf-gcc, 8 Oct 2026); this folder is that source
 with `manifest.py`'s category set to MACHINES, without the firmware probe
 `investigate.py` (it stays in Octaplay).
@@ -42,7 +42,9 @@ What the host suites cover:
 - The display (the UI's step query), the popup text, held TRACK + arrows.
 - The playhead wins over the pattern bytes: pattern bytes say 10 but stock
   plays 16, and the reverse; a length edit is taken at once; NORMAL passes
-  every step through; MASTER LENGTH uses the MASTER SCALE (`0x8e52`).
+  every step through; MASTER LENGTH uses the MASTER SCALE (`0x8e52`); a
+  14-step track under MASTER LENGTH 16 (stock 0..13, 0, 1) keeps 14 as its
+  length, REVERSED 14..1, 14, 13.
 - Per pattern: two patterns keep their own modes across switches.
 - The project lines: their exact text, one per pattern that is not all
   NORMAL, a storing load pass starting from NORMAL, the parse-only pass
@@ -72,7 +74,8 @@ interactive sessions per build, not timed; no stress project.
 | 16 | Mode changes rebuild the prepared step; stopped preparation uses the next run. The phantom is gone. Longer patterns (32/48/64), PER TRACK with MASTER LENGTH INF and various lengths and modes, pattern changes across banks 1–2 and tempo changes all behaved. |
 | 17 | Modes saved with the project (one set for all patterns then). Found: the set was shared by every pattern. |
 | 18–19 | Per-pattern modes, battery RAM table, pattern copy / paste / undo, clear, PINGPONG 2. About 15 minutes on build 19: PINGPONG 2, save / reload, power cycle, copy / paste (also to other banks) and clear all work ([evidence/hardware.md](evidence/hardware.md)). Found: NORMAL scale mode LEN 10, switched to PER TRACK (16/16), still played 10 steps. |
-| 20 | Each track's length follows where the stock playhead really wraps; NORMAL passes every step through; the PER TRACK master cut uses the MASTER SCALE. The reported case is fixed on the unit. |
+| 20 | Each track's length follows where the stock playhead really wraps; NORMAL passes every step through; the PER TRACK master cut uses the MASTER SCALE. The reported case is fixed on the unit. Found: PER TRACK, a 14-step track, MASTER LENGTH 16, REVERSED started on step 5 and looped steps 1–2 (MASTER LENGTH's 2-step pass taken as the length). |
+| 21 | The longest pass is kept, so MASTER LENGTH's short passes no longer count as the length. Reported working on the unit. |
 
 No audio artefacts were heard; audio was not measured (the module adds no
 DSP and changes only which step's trig fires).
@@ -103,7 +106,7 @@ yet.
 
 ## Resources
 
-14,252 bytes, all shared: code 7,140, read-only data 102, state and the
+14,264 bytes, all shared: code 7,152, read-only data 102, state and the
 pattern table 4,700 (SDRAM platform reserve), battery table 2,310 (CS1
 `0x100f8600..0x100f8f06`); stack at most 116 bytes; no heap, DSP memory,
 cave space or effect ID. 35 detours, each guarded by the SHA-256 of the

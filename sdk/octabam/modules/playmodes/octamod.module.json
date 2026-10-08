@@ -7,7 +7,7 @@
   "category": "machines",
   "source": {
     "repository": "https://github.com/devilfish707/Octaplay",
-    "revision": "9a8e9afbc9ff6103c77f693f12011daf06c28dff",
+    "revision": "82b447f4e2b7ed595bd0d160a4fa72c8b5facc6d",
     "path": "playmodes"
   },
   "author": {
@@ -64,14 +64,14 @@
     ]
   },
   "resources": {
-    "recorded": "8 October 2026: emulator counts and build memory (build 20); chip timing unmeasured",
+    "recorded": "8 October 2026: emulator counts and build memory (build 21); chip timing unmeasured",
     "storage": {
       "label": "DRAM data + battery RAM",
-      "display": "14,252 B: 11,942 B unit in DRAM + 2,310 B battery RAM",
-      "value": 14252,
+      "display": "14,264 B: 11,954 B unit in DRAM + 2,310 B battery RAM",
+      "value": 14264,
       "unit": "bytes",
       "method": "static",
-      "conditions": "Code 7,140, read-only data 102, state and pattern table 4,700 (SDRAM platform reserve), battery table 2,310 (CS1). All shared; stack at most 116 bytes. See evidence/memory.md.",
+      "conditions": "Code 7,152, read-only data 102, state and pattern table 4,700 (SDRAM platform reserve), battery table 2,310 (CS1). All shared; stack at most 116 bytes. See evidence/memory.md.",
       "source": "evidence/memory.md"
     },
     "processing": {
@@ -107,16 +107,16 @@
   },
   "tests": {
     "report": "TESTING.md",
-    "summary": "Host suites for the engine and firmware glue pass; instruction counts in octabam's ColdFire core bound one track step at 4,331 instructions (1,860 measured); the author ran builds 12–20 on an MKII (functional report). No stress run, no chip timing.",
+    "summary": "Host suites for the engine and firmware glue pass; instruction counts in octabam's ColdFire core bound one track step at 4,331 instructions (1,860 measured); the author ran builds 12–21 on an MKII (functional report). No stress run, no chip timing.",
     "hardwareStatus": "reported",
-    "evidenceRevision": "9a8e9afbc9ff6103c77f693f12011daf06c28dff",
+    "evidenceRevision": "82b447f4e2b7ed595bd0d160a4fa72c8b5facc6d",
     "gates": [
       "modules/playmodes/verify.py"
     ],
     "qualification": {
       "moduleVersion": "0.1.0-experimental",
-      "sourceSha256": "081715fa3915fc29e1a0c9e5c9c7bc934c4a39a3d0df9bf18f0f4c0423ddd048",
-      "imageSha256": "73ab30f7396a1a2f8b2e814a7667da2ebe545874f590c2b14dda4f06245532b7",
+      "sourceSha256": "6418eecea95e1361965bca7c8923522802dd29cd4d3e9a950991791958cb70c5",
+      "imageSha256": "bebcb3a32054395d964aebef3760aaf55892fd3e73072cf6b3dd167224a3958f",
       "cycles": [
         {
           "processor": "coldfire",
@@ -141,9 +141,9 @@
           {
             "name": "Code: C engine and glue, 35 detour stubs and entries",
             "space": "sdram",
-            "words": 7140,
+            "words": 7152,
             "wordBits": 8,
-            "bytes": 7140,
+            "bytes": 7152,
             "scope": "shared"
           },
           {
@@ -172,10 +172,10 @@
           }
         ],
         "perInstanceBytes": 0,
-        "sharedBytes": 14252,
+        "sharedBytes": 14264,
         "maxInstances": 16,
-        "totalBytes": 14252,
-        "conditions": "From the build-20 runtime ELF and the battery layout; one table for all tracks and patterns, no per-track copies; stack at most 116 bytes below the caller (measured); no heap, DSP memory or cave space. The platform reserve's 10 MB is shared by every DRAM module.",
+        "totalBytes": 14264,
+        "conditions": "From the build-21 runtime ELF and the battery layout; one table for all tracks and patterns, no per-track copies; stack at most 116 bytes below the caller (measured); no heap, DSP memory or cave space. The platform reserve's 10 MB is shared by every DRAM module.",
         "report": "evidence/memory.md"
       },
       "hardware": {
@@ -184,9 +184,9 @@
         "model": "MKII",
         "testedOn": "2026-10-08",
         "tester": "devilfish707",
-        "sourceRevision": "9a8e9afbc9ff6103c77f693f12011daf06c28dff",
-        "imageSha256": "73ab30f7396a1a2f8b2e814a7667da2ebe545874f590c2b14dda4f06245532b7",
-        "summary": "On an Octatrack MKII the author ran builds 12–19 (3–7 Oct; build 19 for about 15 minutes: PINGPONG 2, per-pattern modes, save and reload, a power cycle, pattern copy and paste also to other banks, clear pattern) and build 20 (this source, 8 Oct), which fixes a reported length mismatch after switching NORMAL to PER TRACK scale mode.",
+        "sourceRevision": "82b447f4e2b7ed595bd0d160a4fa72c8b5facc6d",
+        "imageSha256": "bebcb3a32054395d964aebef3760aaf55892fd3e73072cf6b3dd167224a3958f",
+        "summary": "On an Octatrack MKII the author ran builds 12–19 (3–7 Oct; build 19 for about 15 minutes: PINGPONG 2, per-pattern modes, save and reload, a power cycle, pattern copy and paste also to other banks, clear pattern) and builds 20 and 21 (this source, 8 Oct), which fix length mismatches after switching NORMAL to PER TRACK and under MASTER LENGTH.",
         "limitations": [
           "A short interactive report, not a timed stress run; no audio or timing measurement.",
           "One MKII; no MKI.",

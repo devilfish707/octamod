@@ -2,7 +2,7 @@
 
 Method: instruction counts in octabam's ColdFire emulator core (Musashi +
 the V4e layer of `tools/emu/ot_emu`), running **only this module's linked
-code** (build 20, `runtime.elf` of the octamod build, Octaplay `9a8e9af`) in
+code** (build 21, `runtime.elf` of the octamod build, Octaplay `82b447f`) in
 an otherwise empty machine with synthetic sequencer state; no firmware.
 Harness and commands: Octaplay
 [`tools/instruction-count/`](https://github.com/devilfish707/Octaplay/tree/main/tools/instruction-count)
