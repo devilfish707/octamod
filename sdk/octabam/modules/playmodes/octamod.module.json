@@ -7,7 +7,7 @@
   "category": "machines",
   "source": {
     "repository": "https://github.com/devilfish707/Octaplay",
-    "revision": "71f46069537106611831f3cd00a1eef234256df1",
+    "revision": "41dbdaaaf18ddea0bc18f72bc88cc1a0926b84f0",
     "path": "playmodes"
   },
   "author": {
@@ -64,20 +64,20 @@
     ]
   },
   "resources": {
-    "recorded": "8 October 2026: emulator counts and build memory (build 22); chip timing unmeasured",
+    "recorded": "8 October 2026: emulator counts and build memory (build 24); chip timing unmeasured",
     "storage": {
       "label": "DRAM data + battery RAM",
-      "display": "14,744 B: 12,434 B unit in DRAM + 2,310 B battery RAM",
-      "value": 14744,
+      "display": "14,876 B: 12,566 B unit in DRAM + 2,310 B battery RAM",
+      "value": 14876,
       "unit": "bytes",
       "method": "static",
-      "conditions": "Code 7,632, read-only data 102, state and pattern table 4,700 (SDRAM platform reserve), battery table 2,310 (CS1). All shared; stack at most 116 bytes. See evidence/memory.md.",
+      "conditions": "Code 7,700, read-only data 102, state and pattern table 4,764 (SDRAM platform reserve), battery table 2,310 (CS1). All shared; stack at most 120 bytes. See evidence/memory.md.",
       "source": "evidence/memory.md"
     },
     "processing": {
       "label": "ColdFire processing",
-      "display": "≤ 4,503 instructions per track step (1,864 measured)",
-      "value": 4503,
+      "display": "≤ 4,654 instructions per track step (1,884 measured)",
+      "value": 4654,
       "unit": "instructions/event",
       "method": "emulator",
       "conditions": "Instruction counts of the module's own code in octabam's ColdFire core, no firmware, synthetic sequencer state; SHUFFLE's walk bounded analytically. Chip cycles: 32-cycle-per-instruction allowance, not measured.",
@@ -107,21 +107,21 @@
   },
   "tests": {
     "report": "TESTING.md",
-    "summary": "Host suites for the engine and firmware glue pass; instruction counts in octabam's ColdFire core bound one track step at 4,503 instructions (1,864 measured); the author ran builds 12–22 on an MKII (functional report). No stress run, no chip timing.",
+    "summary": "Host suites for the engine and firmware glue pass; instruction counts in octabam's ColdFire core bound one track step at 4,654 instructions (1,884 measured); the author ran builds 12–24 on an MKII (functional report). No stress run, no chip timing.",
     "hardwareStatus": "reported",
-    "evidenceRevision": "71f46069537106611831f3cd00a1eef234256df1",
+    "evidenceRevision": "41dbdaaaf18ddea0bc18f72bc88cc1a0926b84f0",
     "gates": [
       "modules/playmodes/verify.py"
     ],
     "qualification": {
       "moduleVersion": "0.1.0-experimental",
-      "sourceSha256": "a945cb9cd18bbe9d81dfd998877f3d5f081caa44cca464d2ec7ebe484336384b",
-      "imageSha256": "542c2872514fd3b204e6d28786747c429d86777e0ffd7a9ac3d07183504f4039",
+      "sourceSha256": "86105af37d68fcd051cab991b747c949d7813733b73a1fe6d900cf3ec239c5a6",
+      "imageSha256": "97c417e9d18c568784495bce8595140be15dd99da9e7c8704b0905bc645740c7",
       "cycles": [
         {
           "processor": "coldfire",
-          "worstCase": 144096,
-          "maxConfiguration": 2305536,
+          "worstCase": 148928,
+          "maxConfiguration": 2382848,
           "maxInstances": 16,
           "budget": 6600000,
           "unit": "cycles/event",
@@ -141,9 +141,9 @@
           {
             "name": "Code: C engine and glue, 35 detour stubs and entries",
             "space": "sdram",
-            "words": 7632,
+            "words": 7700,
             "wordBits": 8,
-            "bytes": 7632,
+            "bytes": 7700,
             "scope": "shared"
           },
           {
@@ -157,9 +157,9 @@
           {
             "name": "State, flags, popup text, project line, computed track lengths and the 256-pattern mode table",
             "space": "sdram",
-            "words": 4700,
+            "words": 4764,
             "wordBits": 8,
-            "bytes": 4700,
+            "bytes": 4764,
             "scope": "shared"
           },
           {
@@ -172,10 +172,10 @@
           }
         ],
         "perInstanceBytes": 0,
-        "sharedBytes": 14744,
+        "sharedBytes": 14876,
         "maxInstances": 16,
-        "totalBytes": 14744,
-        "conditions": "From the build-22 runtime ELF and the battery layout; one table for all tracks and patterns, no per-track copies; stack at most 116 bytes below the caller (measured); no heap, DSP memory or cave space. The platform reserve's 10 MB is shared by every DRAM module.",
+        "totalBytes": 14876,
+        "conditions": "From the build-24 runtime ELF and the battery layout; one table for all tracks and patterns, no per-track copies; stack at most 120 bytes below the caller (measured); no heap, DSP memory or cave space. The platform reserve's 10 MB is shared by every DRAM module.",
         "report": "evidence/memory.md"
       },
       "hardware": {
@@ -184,9 +184,9 @@
         "model": "MKII",
         "testedOn": "2026-10-08",
         "tester": "devilfish707",
-        "sourceRevision": "71f46069537106611831f3cd00a1eef234256df1",
-        "imageSha256": "542c2872514fd3b204e6d28786747c429d86777e0ffd7a9ac3d07183504f4039",
-        "summary": "On an Octatrack MKII the author ran builds 12–19 (3–7 Oct; build 19 for about 15 minutes: PINGPONG 2, per-pattern modes, save and reload, a power cycle, pattern copy and paste also to other banks, clear pattern) and builds 20–22 (this source, 8 Oct), which fix length mismatches after switching NORMAL to PER TRACK and under MASTER LENGTH, and restart PINGPONG at each master loop.",
+        "sourceRevision": "41dbdaaaf18ddea0bc18f72bc88cc1a0926b84f0",
+        "imageSha256": "97c417e9d18c568784495bce8595140be15dd99da9e7c8704b0905bc645740c7",
+        "summary": "On an Octatrack MKII the author ran builds 12–19 (3–7 Oct; build 19 for about 15 minutes: PINGPONG 2, per-pattern modes, save and reload, a power cycle, pattern copy and paste also to other banks, clear pattern) and builds 20–24 (this source, 8 Oct), which fix length mismatches after switching NORMAL to PER TRACK and under MASTER LENGTH, restart PINGPONG at each master loop (also for a 15-step track under master 16, checked by ear) and keep the trig LEDs on the played step there.",
         "limitations": [
           "A short interactive report, not a timed stress run; no audio or timing measurement.",
           "One MKII; no MKI.",

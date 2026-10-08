@@ -3,7 +3,7 @@
 ## Commands and exact revision
 
 Source: [devilfish707/Octaplay](https://github.com/devilfish707/Octaplay)
-`playmodes/` at commit `71f4606` (build 22 source, `playmodes.s` generated
+`playmodes/` at commit `41dbdaa` (build 24 source, `playmodes.s` generated
 with the author's m68k-elf-gcc, 8 Oct 2026); this folder is that source
 with `manifest.py`'s category set to MACHINES, without the firmware probe
 `investigate.py` (it stays in Octaplay).
@@ -77,7 +77,9 @@ interactive sessions per build, not timed; no stress project.
 | 18–19 | Per-pattern modes, battery RAM table, pattern copy / paste / undo, clear, PINGPONG 2. About 15 minutes on build 19: PINGPONG 2, save / reload, power cycle, copy / paste (also to other banks) and clear all work ([evidence/hardware.md](evidence/hardware.md)). Found: NORMAL scale mode LEN 10, switched to PER TRACK (16/16), still played 10 steps. |
 | 20 | Each track's length follows where the stock playhead really wraps; NORMAL passes every step through; the PER TRACK master cut uses the MASTER SCALE. The reported case is fixed on the unit. Found: PER TRACK, a 14-step track, MASTER LENGTH 16, REVERSED started on step 5 and looped steps 1–2 (MASTER LENGTH's 2-step pass taken as the length). |
 | 21 | The longest pass is kept, so MASTER LENGTH's short passes no longer count as the length. REVERSED works. Found: PINGPONG drifted across master loops instead of starting over. |
-| 22 | A MASTER LENGTH restart starts PINGPONG and PINGPONG 2 over from step 1; RANDOM and SHUFFLE start a new order. Reported working on the unit. |
+| 22 | A MASTER LENGTH restart starts PINGPONG and PINGPONG 2 over from step 1; RANDOM and SHUFFLE start a new order. Reported working on the unit. Found: a 15-step track under MASTER LENGTH 16 (stock plays its step 1 twice: the 16th step, then the restart) played step 14 twice in PINGPONG. |
+| 23 | The same step twice counts as a new step, so that restart is seen: PINGPONG plays 1–15, 14, then 1. Checked by ear on the unit. Found: the trig LEDs showed step 1 on the 16th step (they trail the step the tick has already prepared). |
+| 24 | Each track keeps its last two played steps for the LEDs. LEDs and sound agree on the unit for 15/16 in PINGPONG, PINGPONG 2 and REVERSED, on 14/16 and on a normal 16-step pattern. |
 
 No audio artefacts were heard; audio was not measured (the module adds no
 DSP and changes only which step's trig fires).
@@ -100,17 +102,17 @@ DSP and changes only which step's trig fires).
 
 Instruction counts of the module's own code in octabam's ColdFire emulator
 core (no firmware), with a 32-cycles-per-instruction allowance:
-[evidence/cycles.md](evidence/cycles.md). One track step: 1,864
-instructions measured (SHUFFLE), bounded at 4,503; sixteen tracks: 72,048
-instructions, 2,305,536 cycles, against 6,600,000 for one step at 300 BPM
+[evidence/cycles.md](evidence/cycles.md). One track step: 1,884
+instructions measured (SHUFFLE), bounded at 4,654; sixteen tracks: 74,464
+instructions, 2,382,848 cycles, against 6,600,000 for one step at 300 BPM
 and 2X scale. No chip timing, no `evidence/performance.json` (perf:audit)
 yet.
 
 ## Resources
 
-14,744 bytes, all shared: code 7,632, read-only data 102, state and the
-pattern table 4,700 (SDRAM platform reserve), battery table 2,310 (CS1
-`0x100f8600..0x100f8f06`); stack at most 116 bytes; no heap, DSP memory,
+14,876 bytes, all shared: code 7,700, read-only data 102, state and the
+pattern table 4,764 (SDRAM platform reserve), battery table 2,310 (CS1
+`0x100f8600..0x100f8f06`); stack at most 120 bytes; no heap, DSP memory,
 cave space or effect ID. 35 detours, each guarded by the SHA-256 of the
 stock bytes it replaces. [evidence/memory.md](evidence/memory.md).
 

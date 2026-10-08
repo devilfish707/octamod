@@ -6,7 +6,7 @@ The sequencer's playhead in six directions, per pattern, shared by every
 track or set per track. ColdFire-only (no DSP code, no effect slot), for
 original OS 1.40C.
 
-**Experimental.** Played on the author's MKII in test images (builds 12–22,
+**Experimental.** Played on the author's MKII in test images (builds 12–24,
 3–8 Oct 2026); not stress-tested, chip timing unmeasured. See
 [TESTING.md](TESTING.md).
 
